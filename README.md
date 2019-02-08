@@ -71,4 +71,4 @@ If you want to contribute:
 License: MIT
 
 ------------------
-Project maintained by [frappe](https://github.com/frappe)
+Project forked from [frappe](https://github.com/frappe) and maintained by [Lumeer](https://github.com/Lumeer)
