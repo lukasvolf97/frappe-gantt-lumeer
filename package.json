@@ -1,5 +1,5 @@
 {
-  "name": "frappe-gantt-lumeer",
+  "name": "@lumeerio/frappe-gantt-lumeer",
   "version": "0.3.0",
   "description": "A simple, modern, interactive gantt library for the web",
   "main": "src/index.js",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Lumeer/frappe-gantt-lumeer.git"
+    "url": "git+https://github.com/Lumeer/frappe-gantt-lumeer.git"
   },
   "keywords": [
     "gantt",
@@ -43,5 +43,8 @@
   },
   "eslintIgnore": [
     "dist"
-  ]
+  ],
+  "directories": {
+    "test": "tests"
+  }
 }
