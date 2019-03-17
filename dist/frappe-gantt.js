@@ -1646,11 +1646,13 @@ class Gantt {
             this.bar_being_dragged = parent_bar_id;
 
             bars.forEach(bar => {
-                const $bar = bar.$bar;
-                $bar.ox = $bar.getX();
-                $bar.oy = $bar.getY();
-                $bar.owidth = $bar.getWidth();
-                $bar.finaldx = 0;
+                if (bar.task.editable != false) {
+                    const $bar = bar.$bar;
+                    $bar.ox = $bar.getX();
+                    $bar.oy = $bar.getY();
+                    $bar.owidth = $bar.getWidth();
+                    $bar.finaldx = 0;
+                }
             });
         });
 
@@ -1665,7 +1667,7 @@ class Gantt {
                 let startDrag = true;
                 let endDrag = true;
     
-                if (typeof bar.task.startDrag === 'boolean') startDrag = bar.task.startDrag;
+                if (bar.task.startDrag === 'boolean') startDrag = bar.task.startDrag;
                 if (typeof bar.task.endDrag === 'boolean') endDrag = bar.task.endDrag;  
 
                 if (is_resizing_left) {
