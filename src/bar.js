@@ -227,7 +227,7 @@ export default class Bar {
             }
             this.update_attr(bar, 'x', x);
         }
-        if (width && width >= this.gantt.options.column_width) {
+        if (width) {
             this.update_attr(bar, 'width', width);
         }
         this.update_label_position();
@@ -249,6 +249,7 @@ export default class Bar {
             changed = true;
             this.task._end = new_end_date;
         }
+
 
         if (!changed) return;
 

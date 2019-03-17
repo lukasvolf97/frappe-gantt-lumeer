@@ -631,7 +631,7 @@ class Bar {
             }
             this.update_attr(bar, 'x', x);
         }
-        if (width && width >= this.gantt.options.column_width) {
+        if (width) {
             this.update_attr(bar, 'width', width);
         }
         this.update_label_position();
@@ -653,6 +653,7 @@ class Bar {
             changed = true;
             this.task._end = new_end_date;
         }
+
 
         if (!changed) return;
 
@@ -975,7 +976,6 @@ class Gantt {
         this.setup_options(options);
         this.setup_tasks(tasks);
         // initialize with default view mode
-        console.log("Tu som >/");
         this.change_view_mode();
         this.bind_events();
     }
@@ -1658,38 +1658,43 @@ class Gantt {
             if (!action_in_progress()) return;
             const dx = e.offsetX - x_on_start;
             const dy = e.offsetY - y_on_start;
-            let startDrag = true;
-            let endDrag = true;
 
             bars.forEach(bar => {
                 const $bar = bar.$bar;
                 $bar.finaldx = this.get_snap_position(dx);
-                
+                let startDrag = true;
+                let endDrag = true;
+    
+                if (typeof bar.task.startDrag === 'boolean') startDrag = bar.task.startDrag;
+                if (typeof bar.task.endDrag === 'boolean') endDrag = bar.task.endDrag;  
+
                 if (is_resizing_left) {
                     if (parent_bar_id === bar.task.id) {
-                        if (typeof bar.task.startDrag === 'boolean') startDrag = bar.task.startDrag;
-                        if (startDrag) {
+                        if (startDrag && $bar.ox + $bar.finaldx < $bar.ox + $bar.owidth) {
                             bar.update_bar_position({
-                                x: $bar.ox + $bar.finaldx,
-                                width: $bar.owidth - $bar.finaldx
+                            x: $bar.ox + $bar.finaldx,
+                            width : $bar.owidth - $bar.finaldx
+                            });                              
+                        }
+                    } else if (startDrag && endDrag) {  
+                            bar.update_bar_position({
+                            x: $bar.ox + $bar.finaldx
                             });
                         }
-                    } else if (startDrag){
-                        bar.update_bar_position({
-                            x: $bar.ox + $bar.finaldx
-                        });
-                    }
                 } else if (is_resizing_right) {
-                    if (parent_bar_id === bar.task.id) {
-                        if (typeof bar.task.endDrag === 'boolean') endDrag = bar.task.endDrag;
-                        if (endDrag) {
+                    if (parent_bar_id === bar.task.id) {           
+                        if (endDrag && $bar.owidth + $bar.finaldx > 0) {
                             bar.update_bar_position({
                             width: $bar.owidth + $bar.finaldx
                         });
                         }
                     }
                 } else if (is_dragging) {
-                    bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+                    if (parent_bar_id === bar.task.id) {
+                        if (startDrag && endDrag) {
+                            bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+                        }
+                    }
                 }
             });
         });
