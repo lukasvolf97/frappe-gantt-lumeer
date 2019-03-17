@@ -486,8 +486,9 @@ class Bar {
             rx: this.corner_radius,
             ry: this.corner_radius,
             class: 'bar',
+            style: (this.task.primaryColor) ? 'fill:' + this.task.primaryColor : '',
             append_to: this.bar_group
-        });
+        }); 
 
         animateSVG(this.$bar, 'width', 0, this.width);
 
@@ -506,6 +507,7 @@ class Bar {
             rx: this.corner_radius,
             ry: this.corner_radius,
             class: 'bar-progress',
+            style: (this.task.secondaryColor) ? 'fill:' + this.task.secondaryColor : '',
             append_to: this.bar_group
         });
 
@@ -1672,7 +1674,7 @@ class Gantt {
                 let startDrag = true;
                 let endDrag = true;
     
-                if (bar.task.startDrag === 'boolean') startDrag = bar.task.startDrag;
+                if (typeof bar.task.startDrag === 'boolean') startDrag = bar.task.startDrag;
                 if (typeof bar.task.endDrag === 'boolean') endDrag = bar.task.endDrag;  
 
                 if (is_resizing_left) {

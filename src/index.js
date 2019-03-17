@@ -709,7 +709,7 @@ export default class Gantt {
                 let startDrag = true;
                 let endDrag = true;
     
-                if (bar.task.startDrag === 'boolean') startDrag = bar.task.startDrag;
+                if (typeof bar.task.startDrag === 'boolean') startDrag = bar.task.startDrag;
                 if (typeof bar.task.endDrag === 'boolean') endDrag = bar.task.endDrag;  
 
                 if (is_resizing_left) {

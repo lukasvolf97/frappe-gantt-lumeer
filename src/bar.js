@@ -82,8 +82,9 @@ export default class Bar {
             rx: this.corner_radius,
             ry: this.corner_radius,
             class: 'bar',
+            style: (this.task.primaryColor) ? 'fill:' + this.task.primaryColor : '',
             append_to: this.bar_group
-        });
+        }); 
 
         animateSVG(this.$bar, 'width', 0, this.width);
 
@@ -102,6 +103,7 @@ export default class Bar {
             rx: this.corner_radius,
             ry: this.corner_radius,
             class: 'bar-progress',
+            style: (this.task.secondaryColor) ? 'fill:' + this.task.secondaryColor : '',
             append_to: this.bar_group
         });
 
