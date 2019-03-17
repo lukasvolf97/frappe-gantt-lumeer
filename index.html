@@ -30,8 +30,9 @@
 			{
 				start: '2018-10-01',
 				end: '2018-10-08',
-				name: 'Redesign website',
+				name: 'Redesign website >D',
 				id: "Task 0",
+				startDrag: false,
 				progress: 20
 			},
 			{
@@ -40,6 +41,7 @@
 				name: 'Write new content',
 				id: "Task 1",
 				progress: 5,
+				endDrag: false,
 				dependencies: 'Task 0'
 			},
 			{
@@ -83,6 +85,7 @@
 				progress: 0
 			}
 		]
+
 		var gantt_chart = new Gantt(".gantt-target", tasks, {
 			on_click: function (task) {
 				console.log(task);
