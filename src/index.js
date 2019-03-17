@@ -220,9 +220,14 @@ export default class Gantt {
             }
         }
 
-        this.gantt_start = date_utils.start_of(this.gantt_start, 'day');
-        this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
-
+        if (this.tasks.length == 0) {
+            this.gantt_start =  date_utils.now();
+            this.gantt_end = date_utils.add(this.gantt_start, 9, "day");
+        } else {
+            this.gantt_start = date_utils.start_of(this.gantt_start, 'day');
+            this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
+        }
+ 
         // add date padding on both sides
         if (this.view_is(['Quarter Day', 'Half Day'])) {
             this.gantt_start = date_utils.add(this.gantt_start, -7, 'day');
