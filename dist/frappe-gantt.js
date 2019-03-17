@@ -930,6 +930,7 @@ class Popup {
         if (!options.position) {
             options.position = 'left';
         }
+        this.options = options;
         const target_element = options.target_element;
 
         if (this.custom_html) {
@@ -963,11 +964,11 @@ class Popup {
         }
 
         // show
-        this.parent.style.opacity = 1;
+        this.parent.style.visibility = 'visible';
     }
 
     hide() {
-        this.parent.style.opacity = 0;
+        this.parent.style.visibility = 'hidden';
     }
 }
 
@@ -1248,6 +1249,7 @@ class Gantt {
         this.map_arrows_on_bars();
         this.set_width();
         this.set_scroll_position();
+        this.reload_popup();
     }
 
     setup_layers() {
@@ -1534,9 +1536,14 @@ class Gantt {
     make_bars() {
         this.bars = this.tasks.map(task => {
             const bar = new Bar(this, task);
+            if (this.popup && task == this.popup.options.task) this.popupsBar = bar;
             this.layers.bar.appendChild(bar.group);
             return bar;
         });
+    }
+
+    reload_popup() {
+        if (this.popupsBar) this.popupsBar.show_popup();
     }
 
     make_arrows() {

@@ -26,6 +26,7 @@ export default class Popup {
         if (!options.position) {
             options.position = 'left';
         }
+        this.options = options;
         const target_element = options.target_element;
 
         if (this.custom_html) {
@@ -59,10 +60,10 @@ export default class Popup {
         }
 
         // show
-        this.parent.style.opacity = 1;
+        this.parent.style.visibility = 'visible';
     }
 
     hide() {
-        this.parent.style.opacity = 0;
+        this.parent.style.visibility = 'hidden';
     }
 }

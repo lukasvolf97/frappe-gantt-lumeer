@@ -283,6 +283,7 @@ export default class Gantt {
         this.map_arrows_on_bars();
         this.set_width();
         this.set_scroll_position();
+        this.reload_popup();
     }
 
     setup_layers() {
@@ -569,9 +570,14 @@ export default class Gantt {
     make_bars() {
         this.bars = this.tasks.map(task => {
             const bar = new Bar(this, task);
+            if (this.popup && task == this.popup.options.task) this.popupsBar = bar;
             this.layers.bar.appendChild(bar.group);
             return bar;
         });
+    }
+
+    reload_popup() {
+        if (this.popupsBar) this.popupsBar.show_popup();
     }
 
     make_arrows() {
