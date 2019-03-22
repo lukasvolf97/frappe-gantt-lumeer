@@ -24,6 +24,10 @@
 	<div class="container">
 		<h2>Interactive Gantt Chart entirely made in SVG!</h2>
 		<div class="gantt-target"></div>
+
+		<button type="button" onclick='gantt_chart.change_view_mode("Day")'>Day</button>
+		<button type="button" onclick='gantt_chart.change_view_mode("Month")'>Month</button>
+		<button type="button" onclick='gantt_chart.change_view_mode("Year")'>Year</button>
 	</div>
 	<script>
 		var tasks = [
@@ -32,8 +36,8 @@
 				end: '2018-10-08',
 				name: 'Redesign website',
 				id: "Task 0",
-				primaryColor: 'black',
-				startDrag: false,
+				primary_color: 'black',
+				start_drag: false,
 				progress: 20
 			},
 			{
@@ -42,7 +46,7 @@
 				name: 'Write new content',
 				id: "Task 1",
 				progress: 5,
-				endDrag: false,
+				end_drag: false,
 				dependencies: 'Task 0'
 			},
 			{
@@ -50,7 +54,7 @@
 				end: '2018-10-08',
 				name: 'Apply new styles',
 				id: "Task 2",
-				secondaryColor: 'green',
+				secondary_color: 'green',
 				progress: 10,
 				dependencies: 'Task 1'
 			},

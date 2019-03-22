@@ -82,7 +82,7 @@ export default class Bar {
             rx: this.corner_radius,
             ry: this.corner_radius,
             class: 'bar',
-            style: (this.task.primaryColor) ? 'fill:' + this.task.primaryColor : '',
+            style: (this.task.primary_color) ? 'fill:' + this.task.primary_color : '',
             append_to: this.bar_group
         }); 
 
@@ -103,7 +103,7 @@ export default class Bar {
             rx: this.corner_radius,
             ry: this.corner_radius,
             class: 'bar-progress',
-            style: (this.task.secondaryColor) ? 'fill:' + this.task.secondaryColor : '',
+            style: (this.task.secondary_color) ? 'fill:' + this.task.secondary_color : '',
             append_to: this.bar_group
         });
 
@@ -229,7 +229,7 @@ export default class Bar {
             }
             this.update_attr(bar, 'x', x);
         }
-        if (width) {
+        if (width && width >= this.gantt.options.column_width) {
             this.update_attr(bar, 'width', width);
         }
         this.update_label_position();

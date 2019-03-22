@@ -486,7 +486,7 @@ class Bar {
             rx: this.corner_radius,
             ry: this.corner_radius,
             class: 'bar',
-            style: (this.task.primaryColor) ? 'fill:' + this.task.primaryColor : '',
+            style: (this.task.primary_color) ? 'fill:' + this.task.primary_color : '',
             append_to: this.bar_group
         }); 
 
@@ -507,7 +507,7 @@ class Bar {
             rx: this.corner_radius,
             ry: this.corner_radius,
             class: 'bar-progress',
-            style: (this.task.secondaryColor) ? 'fill:' + this.task.secondaryColor : '',
+            style: (this.task.secondary_color) ? 'fill:' + this.task.secondary_color : '',
             append_to: this.bar_group
         });
 
@@ -633,7 +633,7 @@ class Bar {
             }
             this.update_attr(bar, 'x', x);
         }
-        if (width) {
+        if (width && width >= this.gantt.options.column_width) {
             this.update_attr(bar, 'width', width);
         }
         this.update_label_position();
@@ -1187,8 +1187,8 @@ class Gantt {
         }
 
         if (this.tasks.length == 0) {
-            this.gantt_start =  date_utils.now();
-            this.gantt_end = date_utils.add(this.gantt_start, 9, "day");
+            this.gantt_start = date_utils.now();
+            this.gantt_end = date_utils.add(this.gantt_start, 2, "year");
         } else {
             this.gantt_start = date_utils.start_of(this.gantt_start, 'day');
             this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
@@ -1536,14 +1536,14 @@ class Gantt {
     make_bars() {
         this.bars = this.tasks.map(task => {
             const bar = new Bar(this, task);
-            if (this.popup && task == this.popup.options.task) this.popupsBar = bar;
+            if (this.popup && task == this.popup.options.task) this.popups_bar = bar;
             this.layers.bar.appendChild(bar.group);
             return bar;
         });
     }
 
     reload_popup() {
-        if (this.popupsBar) this.popupsBar.show_popup();
+        if (this.popups_bar) this.popups_bar.show_popup();
     }
 
     make_arrows() {
@@ -1678,28 +1678,27 @@ class Gantt {
             bars.forEach(bar => {
                 const $bar = bar.$bar;
                 $bar.finaldx = this.get_snap_position(dx);
-                let startDrag = true;
-                let endDrag = true;
-    
-                if (typeof bar.task.startDrag === 'boolean') startDrag = bar.task.startDrag;
-                if (typeof bar.task.endDrag === 'boolean') endDrag = bar.task.endDrag;  
+
+                let start_drag = (bar.task.start_drag != undefined) ? bar.task.start_drag : true;
+                let end_drag = (bar.task.end_drag != undefined) ? bar.task.end_drag : true;  
 
                 if (is_resizing_left) {
                     if (parent_bar_id === bar.task.id) {
-                        if (startDrag && $bar.ox + $bar.finaldx < $bar.ox + $bar.owidth) {
+                        if (start_drag && end_drag || 
+                            (!end_drag && $bar.ox + $bar.finaldx < $bar.ox + $bar.owidth)) {
                             bar.update_bar_position({
                             x: $bar.ox + $bar.finaldx,
                             width : $bar.owidth - $bar.finaldx
                             });                              
                         }
-                    } else if (startDrag && endDrag) {  
+                    } else if (start_drag && end_drag) {  
                             bar.update_bar_position({
                             x: $bar.ox + $bar.finaldx
                             });
                         }
                 } else if (is_resizing_right) {
                     if (parent_bar_id === bar.task.id) {           
-                        if (endDrag && $bar.owidth + $bar.finaldx > 0) {
+                        if (end_drag && $bar.owidth + $bar.finaldx > 0) {
                             bar.update_bar_position({
                             width: $bar.owidth + $bar.finaldx
                         });
@@ -1707,7 +1706,7 @@ class Gantt {
                     }
                 } else if (is_dragging) {
                     if (parent_bar_id === bar.task.id) {
-                        if (startDrag && endDrag) {
+                        if (start_drag && end_drag) {
                             bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
                         }
                     }
