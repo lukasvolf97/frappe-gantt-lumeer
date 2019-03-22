@@ -1537,6 +1537,7 @@ class Gantt {
         this.bars = this.tasks.map(task => {
             const bar = new Bar(this, task);
             if (this.popup && task == this.popup.options.task) this.popups_bar = bar;
+            if (this.popup && this.popup.parent.style.visibility == 'hidden') this.popups_bar = null;
             this.layers.bar.appendChild(bar.group);
             return bar;
         });
