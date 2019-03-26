@@ -36,7 +36,8 @@ export default class Bar {
                 (this.task.progress / 100) || 0;
         this.group = createSVG('g', {
             class: 'bar-wrapper ' + (this.task.custom_class || ''),
-            'data-id': this.task.id
+            'data-id': this.task.id,
+            id: this.task.id
         });
         this.bar_group = createSVG('g', {
             class: 'bar-group',
@@ -91,23 +92,40 @@ export default class Bar {
         if (this.invalid) {
             this.$bar.classList.add('bar-invalid');
         }
+
     }
 
     draw_progress_bar() {
         if (this.invalid) return;
+        let bar_progress_width = this.progress_width;
+        let bar_progress_inner_width = this.progress_width >= this.width ? this.width : this.progress_width;;
+
         this.$bar_progress = createSVG('rect', {
             x: this.x,
             y: this.y,
-            width: this.progress_width,
+            width: bar_progress_width,
             height: this.height,
             rx: this.corner_radius,
             ry: this.corner_radius,
             class: 'bar-progress',
-            style: (this.task.secondary_color) ? 'fill:' + this.task.secondary_color : '',
+            style: ((this.task.secondary_color) ? 'fill:' + this.task.secondary_color + '; ': '') + 'opacity: 0.5',
+            append_to: this.bar_group
+        });
+        this.$bar_progress_inner = createSVG('rect', {
+            x: this.x,
+            y: this.y,
+            width: bar_progress_inner_width,
+            height: this.height,
+            rx: this.corner_radius,
+            ry: this.corner_radius,
+            class: 'bar-progress',
+            style: (this.task.secondary_color) ? 'fill:' + this.task.secondary_color + '; ' : '',
             append_to: this.bar_group
         });
 
-        animateSVG(this.$bar_progress, 'width', 0, this.progress_width);
+        animateSVG(this.$bar_progress_inner, 'width', 0, bar_progress_inner_width);
+        animateSVG(this.$bar_progress, 'width', 0, bar_progress_width);
+         
     }
 
     draw_label() {
@@ -150,7 +168,7 @@ export default class Bar {
             append_to: this.handle_group
         });
 
-        if (this.task.progress && this.task.progress < 100) {
+        if (this.task.progress) {
             this.$handle_progress = createSVG('polygon', {
                 points: this.get_progress_polygon_points().join(','),
                 class: 'handle progress',
@@ -234,7 +252,11 @@ export default class Bar {
         }
         this.update_label_position();
         this.update_handle_position();
-        this.update_progressbar_position();
+
+        let new_width = this.$bar.getWidth() * (this.task.progress / 100);
+        this.update_progressbar_position(this.$bar_progress, new_width);
+        this.update_progressbar_position(this.$bar_progress_inner, new_width > this.$bar.getWidth() ? this.$bar.getWidth() : new_width);
+
         this.update_arrow_position();
     }
 
@@ -361,12 +383,9 @@ export default class Bar {
         return element;
     }
 
-    update_progressbar_position() {
-        this.$bar_progress.setAttribute('x', this.$bar.getX());
-        this.$bar_progress.setAttribute(
-            'width',
-            this.$bar.getWidth() * (this.task.progress / 100)
-        );
+    update_progressbar_position(bar_progress, width) {
+        bar_progress.setAttribute('x', this.$bar.getX());
+        bar_progress.setAttribute('width',width);
     }
 
     update_label_position() {

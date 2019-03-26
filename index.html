@@ -28,6 +28,9 @@
 		<button type="button" onclick='gantt_chart.change_view_mode("Day")'>Day</button>
 		<button type="button" onclick='gantt_chart.change_view_mode("Month")'>Month</button>
 		<button type="button" onclick='gantt_chart.change_view_mode("Year")'>Year</button>
+		<button type="button" onclick='gantt_chart.refresh([])'>Empty Tasks</button>
+		<button type="button" onclick='gantt_chart.refresh(tasks)'>Fill with Tasks</button>
+		
 	</div>
 	<script>
 		var tasks = [
@@ -38,7 +41,7 @@
 				id: "Task 0",
 				primary_color: 'black',
 				start_drag: false,
-				progress: 20
+				progress: 120
 			},
 			{
 				start: '2018-10-03',
@@ -82,7 +85,7 @@
 				progress: 0,
 				dependencies: 'Task 4',
 				custom_class: 'bar-milestone'
-			},
+			}/*,
 			{
 				start: '2014-01-05',
 				end: '2019-10-12',
@@ -90,7 +93,7 @@
 				editable: false,
 				id: "Task 6",
 				progress: 0
-			}
+			}*/
 		]
 
 		var gantt_chart = new Gantt(".gantt-target", tasks, {

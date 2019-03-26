@@ -312,7 +312,7 @@ export default class Gantt {
             this.options.header_height +
             this.options.padding +
             (this.options.bar_height + this.options.padding) *
-                this.tasks.length;
+                (this.tasks.length == 0 ? 5 : this.tasks.length);
 
         createSVG('rect', {
             x: 0,
@@ -338,7 +338,7 @@ export default class Gantt {
 
         let row_y = this.options.header_height + this.options.padding / 2;
 
-        for (let task of this.tasks) {
+        for ( var i = 0; i <= (this.tasks.length == 0 ? 5 : this.tasks.length); i++) {
             createSVG('rect', {
                 x: 0,
                 y: row_y,
@@ -571,6 +571,7 @@ export default class Gantt {
         this.bars = this.tasks.map(task => {
             const bar = new Bar(this, task);
             if (this.popup && task == this.popup.options.task) this.popups_bar = bar;
+            if (this.popup && this.popup.parent.style.visibility == 'hidden') this.popups_bar = null;
             this.layers.bar.appendChild(bar.group);
             return bar;
         });
@@ -626,7 +627,7 @@ export default class Gantt {
         const parent_element = this.$svg.parentElement;
         if (!parent_element) return;
 
-        const hours_before_first_task = date_utils.diff(
+        const hours_before_first_task = this.tasks.length == 0 ? this.gantt_start : date_utils.diff(
             this.get_oldest_starting_date(),
             this.gantt_start,
             'hour'
@@ -666,7 +667,6 @@ export default class Gantt {
         function action_in_progress() {
             return is_dragging || is_resizing_left || is_resizing_right;
         }
-
 
         $.on(this.$svg, 'mousedown', '.bar-wrapper, .handle', (e, element) => {
             const bar_wrapper = $.closest('.bar-wrapper', element);
@@ -777,6 +777,7 @@ export default class Gantt {
         let is_resizing = null;
         let bar = null;
         let $bar_progress = null;
+        let $bar_progress_inner = null;
         let $bar = null;
 
         $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
@@ -787,14 +788,14 @@ export default class Gantt {
             const $bar_wrapper = $.closest('.bar-wrapper', handle);
             const id = $bar_wrapper.getAttribute('data-id');
             bar = this.get_bar(id);
-
+            
             $bar_progress = bar.$bar_progress;
+            $bar_progress_inner = bar.$bar_progress_inner;
             $bar = bar.$bar;
 
             $bar_progress.finaldx = 0;
             $bar_progress.owidth = $bar_progress.getWidth();
             $bar_progress.min_dx = -$bar_progress.getWidth();
-            $bar_progress.max_dx = $bar.getWidth() - $bar_progress.getWidth();
         });
 
         $.on(this.$svg, 'mousemove', e => {
@@ -802,15 +803,20 @@ export default class Gantt {
             let dx = e.offsetX - x_on_start;
             let dy = e.offsetY - y_on_start;
 
-            if (dx > $bar_progress.max_dx) {
-                dx = $bar_progress.max_dx;
-            }
             if (dx < $bar_progress.min_dx) {
                 dx = $bar_progress.min_dx;
             }
 
             const $handle = bar.$handle_progress;
-            $.attr($bar_progress, 'width', $bar_progress.owidth + dx);
+
+            const finale_width = $bar_progress.owidth + dx;
+            $.attr($bar_progress, 'width', finale_width);
+            if (finale_width <= $bar.getWidth()) {
+                $.attr($bar_progress_inner, 'width', finale_width);
+            } else {
+                $.attr($bar_progress_inner, 'width', $bar.getWidth());
+            }
+
             $.attr($handle, 'points', bar.get_progress_polygon_points());
             $bar_progress.finaldx = dx;
         });
