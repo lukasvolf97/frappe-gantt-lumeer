@@ -1438,6 +1438,7 @@ var Gantt = (function () {
                     append_to: this.layers.date
                 });
 
+<<<<<<< HEAD
                 if (date.upper_text) {
                     const $upper_text = createSVG('text', {
                         x: date.upper_x,
@@ -1456,6 +1457,17 @@ var Gantt = (function () {
                 }
             }
         }
+=======
+    make_bars() {
+        this.bars = this.tasks.map(task => {
+            const bar = new Bar(this, task);
+            if (this.popup && task == this.popup.options.task) this.popups_bar = bar;
+            if (this.popup && this.popup.parent.style.visibility == 'hidden') this.popups_bar = null;
+            this.layers.bar.appendChild(bar.group);
+            return bar;
+        });
+    }
+>>>>>>> 6a93e6fbbb4c7eac6ec7e5aadae0dca086338dea
 
         get_dates_to_draw() {
             let last_date = null;
