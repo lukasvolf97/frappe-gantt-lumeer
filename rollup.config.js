@@ -14,7 +14,7 @@ const dev = {
     plugins: [
         sass({
             output: 'dist/frappe-gantt.css'
-        }),
+        })
     ]
 };
 

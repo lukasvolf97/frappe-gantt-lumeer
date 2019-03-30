@@ -39,12 +39,19 @@ export default class Bar {
             'data-id': this.task.id,
             id: this.task.id
         });
+        this.inner_bar_group = createSVG('g', {
+            append_to: this.group
+        })
         this.bar_group = createSVG('g', {
             class: 'bar-group',
-            append_to: this.group
+            append_to: this.inner_bar_group
         });
         this.handle_group = createSVG('g', {
             class: 'handle-group',
+            append_to: this.inner_bar_group
+        });
+        this.endpoint_group = createSVG('g', {
+            class: 'endpoint-group',
             append_to: this.group
         });
     }
@@ -72,6 +79,7 @@ export default class Bar {
         this.draw_progress_bar();
         this.draw_label();
         this.draw_resize_handles();
+        this.draw_endpoints();
     }
 
     draw_bar() {
@@ -132,6 +140,7 @@ export default class Bar {
         createSVG('text', {
             x: this.x + this.width / 2,
             y: this.y + this.height / 2,
+            style: (this.task.text_color) ? 'fill:' + this.task.text_color + '; ' : '',
             innerHTML: this.task.name,
             class: 'bar-label',
             append_to: this.bar_group
@@ -177,6 +186,29 @@ export default class Bar {
         }
     }
 
+    draw_endpoints() {
+        if (this.invalid) return;
+
+        const bar = this.$bar;
+        const endpoint_r = 4;
+
+        this.$endpoint_end = createSVG('circle', {
+            cx: bar.getEndX() + endpoint_r * 2,
+            cy: bar.getY() + bar.getHeight() / 2,
+            r: endpoint_r,
+            class: 'endpoint end',
+            append_to: this.endpoint_group
+        });
+
+        this.$endpoint_start = createSVG('circle', {
+            cx: bar.getX() - endpoint_r * 2,
+            cy: bar.getY() + bar.getHeight() / 2,
+            r: endpoint_r,
+            class: 'endpoint start',
+            append_to: this.endpoint_group
+        });
+    }
+
     get_progress_polygon_points() {
         const bar_progress = this.$bar_progress;
         return [
@@ -195,7 +227,7 @@ export default class Bar {
     }
 
     setup_click_event() {
-        $.on(this.group, 'focus ' + this.gantt.options.popup_trigger, e => {
+        $.on(this.bar_group, 'focus ' + this.gantt.options.popup_trigger, e => {
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
@@ -213,6 +245,7 @@ export default class Bar {
     }
 
     show_popup() {
+        console.log(this.gantt.bar_being_dragged);
         if (this.gantt.bar_being_dragged) return;
 
         const start_date = date_utils.format(this.task._start, 'MMM D');
@@ -258,6 +291,7 @@ export default class Bar {
         this.update_progressbar_position(this.$bar_progress_inner, new_width > this.$bar.getWidth() ? this.$bar.getWidth() : new_width);
 
         this.update_arrow_position();
+        this.update_endpoints_position();
     }
 
     date_changed() {
@@ -420,6 +454,17 @@ export default class Bar {
             arrow.update();
         }
     }
+
+    update_endpoints_position() {
+        const bar = this.$bar;
+        this.endpoint_group
+            .querySelector('.endpoint.start')
+            .setAttribute('cx', bar.getX() - 8);
+        this.endpoint_group
+            .querySelector('.endpoint.end')
+            .setAttribute('cx', bar.getEndX() + 8);
+    }
+
 }
 
 function isFunction(functionToCheck) {

@@ -443,12 +443,19 @@ var Gantt = (function () {
                 'data-id': this.task.id,
                 id: this.task.id
             });
+            this.inner_bar_group = createSVG('g', {
+                append_to: this.group
+            });
             this.bar_group = createSVG('g', {
                 class: 'bar-group',
-                append_to: this.group
+                append_to: this.inner_bar_group
             });
             this.handle_group = createSVG('g', {
                 class: 'handle-group',
+                append_to: this.inner_bar_group
+            });
+            this.endpoint_group = createSVG('g', {
+                class: 'endpoint-group',
                 append_to: this.group
             });
         }
@@ -476,6 +483,7 @@ var Gantt = (function () {
             this.draw_progress_bar();
             this.draw_label();
             this.draw_resize_handles();
+            this.draw_endpoints();
         }
 
         draw_bar() {
@@ -535,6 +543,7 @@ var Gantt = (function () {
             createSVG('text', {
                 x: this.x + this.width / 2,
                 y: this.y + this.height / 2,
+                style: (this.task.text_color) ? 'fill:' + this.task.text_color + '; ' : '',
                 innerHTML: this.task.name,
                 class: 'bar-label',
                 append_to: this.bar_group
@@ -580,6 +589,29 @@ var Gantt = (function () {
             }
         }
 
+        draw_endpoints() {
+            if (this.invalid) return;
+
+            const bar = this.$bar;
+            const endpoint_r = 4;
+
+            this.$endpoint_end = createSVG('circle', {
+                cx: bar.getEndX() + endpoint_r * 2,
+                cy: bar.getY() + bar.getHeight() / 2,
+                r: endpoint_r,
+                class: 'endpoint end',
+                append_to: this.endpoint_group
+            });
+
+            this.$endpoint_start = createSVG('circle', {
+                cx: bar.getX() - endpoint_r * 2,
+                cy: bar.getY() + bar.getHeight() / 2,
+                r: endpoint_r,
+                class: 'endpoint start',
+                append_to: this.endpoint_group
+            });
+        }
+
         get_progress_polygon_points() {
             const bar_progress = this.$bar_progress;
             return [
@@ -598,7 +630,7 @@ var Gantt = (function () {
         }
 
         setup_click_event() {
-            $.on(this.group, 'focus ' + this.gantt.options.popup_trigger, e => {
+            $.on(this.bar_group, 'focus ' + this.gantt.options.popup_trigger, e => {
                 if (this.action_completed) {
                     // just finished a move action, wait for a few seconds
                     return;
@@ -616,6 +648,7 @@ var Gantt = (function () {
         }
 
         show_popup() {
+            console.log(this.gantt.bar_being_dragged);
             if (this.gantt.bar_being_dragged) return;
 
             const start_date = date_utils.format(this.task._start, 'MMM D');
@@ -661,6 +694,7 @@ var Gantt = (function () {
             this.update_progressbar_position(this.$bar_progress_inner, new_width > this.$bar.getWidth() ? this.$bar.getWidth() : new_width);
 
             this.update_arrow_position();
+            this.update_endpoints_position();
         }
 
         date_changed() {
@@ -823,6 +857,17 @@ var Gantt = (function () {
                 arrow.update();
             }
         }
+
+        update_endpoints_position() {
+            const bar = this.$bar;
+            this.endpoint_group
+                .querySelector('.endpoint.start')
+                .setAttribute('cx', bar.getX() - 8);
+            this.endpoint_group
+                .querySelector('.endpoint.end')
+                .setAttribute('cx', bar.getEndX() + 8);
+        }
+
     }
 
     class Arrow {
@@ -1036,6 +1081,9 @@ var Gantt = (function () {
 
             // wrapper element
             this.$container = document.createElement('div');
+            //this.$container.style.cssFloat = 'right';
+            this.$container.style.display = 'inline-block';
+            this.$container.style.width = '75%';
             this.$container.classList.add('gantt-container');
 
             const parent_element = this.$svg.parentElement;
@@ -1438,7 +1486,6 @@ var Gantt = (function () {
                     append_to: this.layers.date
                 });
 
-<<<<<<< HEAD
                 if (date.upper_text) {
                     const $upper_text = createSVG('text', {
                         x: date.upper_x,
@@ -1457,17 +1504,6 @@ var Gantt = (function () {
                 }
             }
         }
-=======
-    make_bars() {
-        this.bars = this.tasks.map(task => {
-            const bar = new Bar(this, task);
-            if (this.popup && task == this.popup.options.task) this.popups_bar = bar;
-            if (this.popup && this.popup.parent.style.visibility == 'hidden') this.popups_bar = null;
-            this.layers.bar.appendChild(bar.group);
-            return bar;
-        });
-    }
->>>>>>> 6a93e6fbbb4c7eac6ec7e5aadae0dca086338dea
 
         get_dates_to_draw() {
             let last_date = null;
@@ -1709,8 +1745,8 @@ var Gantt = (function () {
                     const $bar = bar.$bar;
                     $bar.finaldx = this.get_snap_position(dx);
 
-                    let start_drag = (bar.task.start_drag != undefined) ? bar.task.start_drag : true;
-                    let end_drag = (bar.task.end_drag != undefined) ? bar.task.end_drag : true;  
+                    let start_drag = (bar.task.start_drag !== undefined) ? bar.task.start_drag : true;
+                    let end_drag = (bar.task.end_drag !== undefined) ? bar.task.end_drag : true;     
 
                     if (is_resizing_left) {
                         if (parent_bar_id === bar.task.id) {
@@ -1765,6 +1801,7 @@ var Gantt = (function () {
             });
 
             this.bind_bar_progress();
+            this.bind_endpoints();
         }
 
         bind_bar_progress() {
@@ -1823,6 +1860,67 @@ var Gantt = (function () {
                 bar.progress_changed();
                 bar.set_action_completed();
             });
+        }
+
+        bind_endpoints() {
+            let from_bar = null;
+            let to_bar = null;
+
+            $.on(this.$svg,'click','.endpoint', (e, element) => {
+                const bar_wrapper = $.closest('.bar-wrapper', element);
+
+                if (from_bar == null) {
+                    from_bar = this.get_bar(bar_wrapper.getAttribute('data-id'));
+                    this.bars.forEach( (b) => {
+                        if (from_bar != b && !b.task.dependencies.includes(from_bar.task.id)) {
+                            b.$endpoint_start.style.opacity = 1;
+                            b.$endpoint_start.style.fill = 'green';
+                            b.$endpoint_end.style.opacity = 1;
+                            b.$endpoint_end.style.fill = 'green';
+                        } else {
+                            b.$endpoint_start.style.visibility = 'hidden';
+                            b.$endpoint_end.style.visibility = 'hidden';
+                        }
+                    });
+                } else {
+                    to_bar = this.get_bar(bar_wrapper.getAttribute('data-id'));
+                    
+                    if (from_bar != to_bar) {
+                        to_bar.task.dependencies.push(from_bar.task.id);
+                    
+                        const arrow = new Arrow(
+                            this,
+                            from_bar,
+                            to_bar
+                        );
+                        this.layers.arrow.appendChild(arrow.element);
+
+                        this.arrows.push(arrow);
+                        from_bar.arrows.push(arrow);
+                        to_bar.arrows.push(arrow);
+                    }
+
+                    [from_bar, to_bar] = this.reset_endpoints();
+                }
+            });
+
+            $.on(
+                this.$svg,
+                'click',
+                '.grid-row, .grid-header, .bar-group, .handle-group',
+                () => {
+                    [from_bar, to_bar] = this.reset_endpoints();
+                }
+            );
+        }
+
+        reset_endpoints() {
+            this.bars.forEach( (b) => {
+                b.$endpoint_start.removeAttribute('style');
+                b.$endpoint_end.removeAttribute('style');
+            });
+
+            return [null,null];
         }
 
         get_all_dependent_tasks(task_id) {

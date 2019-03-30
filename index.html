@@ -35,19 +35,12 @@
 	<script>
 		var tasks = [
 			{
-				start: '2018-01-01',
-				end: '2018-01-02',
-				name: 'Redesign website',
-				id: "Task 0",
-				primary_color: 'black',
-				start_drag: false,
-				progress: 20
-			},
-			{
 				start: '2018-10-01',
 				end: '2018-10-08',
 				name: 'Redesign website',
 				id: "Task 0",
+				swimlane: "First steps",
+				swimlane_part: "1. item",
 				primary_color: 'black',
 				start_drag: false,
 				progress: 120
@@ -58,14 +51,17 @@
 				name: 'Write new content',
 				id: "Task 1",
 				progress: 5,
+				swimlane: "First steps",
+				swimlane_part: "2. item",
 				end_drag: false,
-				dependencies: 'Task 0'
 			},
 			{
 				start: '2018-10-04',
 				end: '2018-10-08',
 				name: 'Apply new styles',
 				id: "Task 2",
+				text_color: "black",
+				swimlane: "Second one",
 				secondary_color: 'green',
 				progress: 10,
 				dependencies: 'Task 1'
@@ -75,6 +71,7 @@
 				end: '2018-10-09',
 				name: 'Review',
 				id: "Task 3",
+				text_color: "red",
 				progress: 5,
 				dependencies: 'Task 2'
 			},

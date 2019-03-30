@@ -87,6 +87,12 @@ $handle-color: #ddd !default;
 		transition: opacity .3s ease;
 	}
 
+	.endpoint {
+		fill: $handle-color;
+		opacity: 0;
+		transition: opacity .3s ease;
+	}
+
 	.bar-wrapper {
 		cursor: pointer;
 		outline: none;
@@ -102,6 +108,10 @@ $handle-color: #ddd !default;
 
 			.handle {
 				visibility: visible;
+				opacity: 1;
+			}
+
+			.endpoint {
 				opacity: 1;
 			}
 		}

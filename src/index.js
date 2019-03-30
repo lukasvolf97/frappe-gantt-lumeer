@@ -52,6 +52,9 @@ export default class Gantt {
 
         // wrapper element
         this.$container = document.createElement('div');
+        //this.$container.style.cssFloat = 'right';
+        this.$container.style.display = 'inline-block';
+        this.$container.style.width = '75%';
         this.$container.classList.add('gantt-container');
 
         const parent_element = this.$svg.parentElement;
@@ -713,8 +716,8 @@ export default class Gantt {
                 const $bar = bar.$bar;
                 $bar.finaldx = this.get_snap_position(dx);
 
-                let start_drag = (bar.task.start_drag != undefined) ? bar.task.start_drag : true
-                let end_drag = (bar.task.end_drag != undefined) ? bar.task.end_drag : true  
+                let start_drag = (bar.task.start_drag !== undefined) ? bar.task.start_drag : true
+                let end_drag = (bar.task.end_drag !== undefined) ? bar.task.end_drag : true     
 
                 if (is_resizing_left) {
                     if (parent_bar_id === bar.task.id) {
@@ -769,6 +772,7 @@ export default class Gantt {
         });
 
         this.bind_bar_progress();
+        this.bind_endpoints();
     }
 
     bind_bar_progress() {
@@ -827,6 +831,67 @@ export default class Gantt {
             bar.progress_changed();
             bar.set_action_completed();
         });
+    }
+
+    bind_endpoints() {
+        let from_bar = null;
+        let to_bar = null;
+
+        $.on(this.$svg,'click','.endpoint', (e, element) => {
+            const bar_wrapper = $.closest('.bar-wrapper', element);
+
+            if (from_bar == null) {
+                from_bar = this.get_bar(bar_wrapper.getAttribute('data-id'));
+                this.bars.forEach( (b) => {
+                    if (from_bar != b && !b.task.dependencies.includes(from_bar.task.id)) {
+                        b.$endpoint_start.style.opacity = 1;
+                        b.$endpoint_start.style.fill = 'green';
+                        b.$endpoint_end.style.opacity = 1;
+                        b.$endpoint_end.style.fill = 'green';
+                    } else {
+                        b.$endpoint_start.style.visibility = 'hidden';
+                        b.$endpoint_end.style.visibility = 'hidden';
+                    }
+                });
+            } else {
+                to_bar = this.get_bar(bar_wrapper.getAttribute('data-id'));
+                
+                if (from_bar != to_bar) {
+                    to_bar.task.dependencies.push(from_bar.task.id);
+                
+                    const arrow = new Arrow(
+                        this,
+                        from_bar,
+                        to_bar
+                    );
+                    this.layers.arrow.appendChild(arrow.element);
+
+                    this.arrows.push(arrow);
+                    from_bar.arrows.push(arrow);
+                    to_bar.arrows.push(arrow);
+                }
+
+                [from_bar, to_bar] = this.reset_endpoints();
+            }
+        });
+
+        $.on(
+            this.$svg,
+            'click',
+            '.grid-row, .grid-header, .bar-group, .handle-group',
+            () => {
+                [from_bar, to_bar] = this.reset_endpoints();
+            }
+        );
+    }
+
+    reset_endpoints() {
+        this.bars.forEach( (b) => {
+            b.$endpoint_start.removeAttribute('style');
+            b.$endpoint_end.removeAttribute('style');
+        });
+
+        return [null,null];
     }
 
     get_all_dependent_tasks(task_id) {
