@@ -26,6 +26,7 @@
   opacity: 0.5; }
 
 .gantt .arrow {
+  cursor: pointer;
   fill: none;
   stroke: #666;
   stroke-width: 1.4; }
@@ -80,8 +81,13 @@
   .gantt .bar-wrapper:hover .handle {
     visibility: visible;
     opacity: 1; }
-  .gantt .bar-wrapper:hover .endpoint {
+  .gantt .bar-wrapper:hover .endpoint.end {
+    cursor: copy;
+    stroke: cyan;
+    stroke-width: 1px;
     opacity: 1; }
+  .gantt .bar-wrapper:hover .endpoint.start {
+    cursor: default; }
   .gantt .bar-wrapper.active .bar {
     fill: #a9b5c1; }
   .gantt .bar-wrapper.active .bar-progress {

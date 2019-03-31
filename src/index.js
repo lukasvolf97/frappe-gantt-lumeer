@@ -60,7 +60,6 @@ export default class Gantt {
         // wrapper element
         this.$container = document.createElement('div');
         this.$container.classList.add('gantt-container');
-    
 
         const parent_element = this.$svg.parentElement;
         parent_element.appendChild(this.$swimlanes_container);
@@ -861,10 +860,8 @@ export default class Gantt {
                         }
                     }
                 } else if (is_dragging) {
-                    if (parent_bar_id === bar.task.id) {
-                        if (start_drag && end_drag) {
+                    if (start_drag && end_drag) {
                             bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
-                        }
                     }
                 }
             });
@@ -958,17 +955,18 @@ export default class Gantt {
 
         $.on(this.$svg,'click','.endpoint', (e, element) => {
             const bar_wrapper = $.closest('.bar-wrapper', element);
+            
+            if (element.classList.contains('start')) {
+                return;
+            }
 
             if (from_bar == null) {
                 from_bar = this.get_bar(bar_wrapper.getAttribute('data-id'));
                 this.bars.forEach( (b) => {
                     if (from_bar != b && !b.task.dependencies.includes(from_bar.task.id)) {
-                        b.$endpoint_start.style.opacity = 1;
-                        b.$endpoint_start.style.fill = 'green';
                         b.$endpoint_end.style.opacity = 1;
                         b.$endpoint_end.style.fill = 'green';
                     } else {
-                        b.$endpoint_start.style.visibility = 'hidden';
                         b.$endpoint_end.style.visibility = 'hidden';
                     }
                 });
@@ -988,6 +986,7 @@ export default class Gantt {
                     this.arrows.push(arrow);
                     from_bar.arrows.push(arrow);
                     to_bar.arrows.push(arrow);
+                    this.trigger_event('dependency_added', [from_bar.task.id]);
                 }
 
                 [from_bar, to_bar] = this.reset_endpoints();
@@ -1006,9 +1005,13 @@ export default class Gantt {
     }
 
     reset_endpoints() {
-        this.bars.forEach( (b) => {
-            b.$endpoint_start.removeAttribute('style');
-            b.$endpoint_end.removeAttribute('style');
+        this.bars.forEach((b) => {
+            b.$endpoint_end.style.fill = null;
+            if (!b.$endpoint_end.is_used) {
+                b.$endpoint_end.style.opacity = null;
+            }
+
+            b.$endpoint_end.style.visibility = null;
         });
 
         return [null,null];

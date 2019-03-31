@@ -880,30 +880,25 @@ var Gantt = (function () {
         }
 
         calculate_path() {
-            let start_x =
-                this.from_task.$bar.getX() + this.from_task.$bar.getWidth() / 2;
 
-            const condition = () =>
-                this.to_task.$bar.getX() < start_x + this.gantt.options.padding &&
-                start_x > this.from_task.$bar.getX() + this.gantt.options.padding;
-
-            while (condition()) {
-                start_x -= 10;
+            if (this.endpoint === undefined) {
+                this.endpoint = (this.from_task.$bar.getX() <= this.to_task.$bar.getX()) ? this.from_task.$endpoint_end :
+                    this.from_task.$endpoint_start;
+                this.endpoint.style.opacity = 1;
+                this.endpoint.is_used = true;
             }
+            const start_x =
+                this.endpoint.getAttribute('cx');
 
             const start_y =
-                this.gantt.options.header_height +
-                this.gantt.options.bar_height +
-                (this.gantt.options.padding + this.gantt.options.bar_height) *
-                    this.from_task.task._index +
-                this.gantt.options.padding;
+                this.endpoint.getAttribute('cy');
 
             const end_x = this.to_task.$bar.getX() - this.gantt.options.padding / 2;
             const end_y =
                 this.gantt.options.header_height +
                 this.gantt.options.bar_height / 2 +
                 (this.gantt.options.padding + this.gantt.options.bar_height) *
-                    this.to_task.task._index +
+                this.to_task.task._index +
                 this.gantt.options.padding;
 
             const from_is_below_to =
@@ -915,27 +910,41 @@ var Gantt = (function () {
                 ? end_y + this.gantt.options.arrow_curve
                 : end_y - this.gantt.options.arrow_curve;
 
-            this.path = `
-            M ${start_x} ${start_y}
-            V ${offset}
-            a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
-            L ${end_x} ${end_y}
-            m -5 -5
-            l 5 5
-            l -5 5`;
 
-            if (
-                this.to_task.$bar.getX() <
-                this.from_task.$bar.getX() + this.gantt.options.padding
-            ) {
-                const down_1 = this.gantt.options.padding / 2 - curve;
-                const down_2 =
-                    this.to_task.$bar.getY() +
-                    this.to_task.$bar.getHeight() / 2 -
-                    curve_y;
-                const left = this.to_task.$bar.getX() - this.gantt.options.padding;
+            const down_1 = this.gantt.options.padding - curve;
+            const down_2 =
+                this.to_task.$bar.getY() +
+                this.to_task.$bar.getHeight() / 2 -
+                curve_y;
+            const left = this.to_task.$bar.getX() - this.gantt.options.padding;
 
-                this.path = `
+            if (this.endpoint.getAttribute('class').includes('start')) {
+                if (this.to_task.$bar.getX() > this.from_task.$bar.getX()) {
+                    this.path = `
+                M ${start_x} ${start_y}
+                h ${-curve * 2}
+                a ${curve} ${curve} 0 0 ${clockwise} -${curve} ${curve_y}
+                V ${down_2}
+                a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
+                L ${end_x} ${end_y}
+                m -5 -5
+                l 5 5
+                l -5 5`;
+                } else {
+                    this.path = `
+                M ${start_x} ${start_y}
+                H ${left}
+                a ${curve} ${curve} 0 0 ${clockwise} -${curve} ${curve_y}
+                V ${down_2}
+                a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
+                L ${end_x} ${end_y}
+                m -5 -5
+                l 5 5
+                l -5 5`;
+                }
+            } else {
+                if (this.to_task.$bar.getX() <= this.from_task.$bar.getEndX()) {
+                    this.path = `
                 M ${start_x} ${start_y}
                 v ${down_1}
                 a ${curve} ${curve} 0 0 1 -${curve} ${curve}
@@ -947,7 +956,42 @@ var Gantt = (function () {
                 m -5 -5
                 l 5 5
                 l -5 5`;
+                } else {
+                    this.path = `
+                M ${start_x} ${start_y}
+                V ${down_2}
+                a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
+                L ${end_x} ${end_y}
+                m -5 -5
+                l 5 5
+                l -5 5`;
+                }
             }
+        }
+
+        setup_click_event() {
+            $.on(this.element, 'click', e => {
+
+                if (e.type === 'click') {
+                    this.gantt.trigger_event('dependency_deleted', [this.element]);
+                }
+
+                this.element.parentNode.removeChild(this.element);
+                if (this.to_task.task.dependencies.length === 0) {
+                    this.element.style.opacity = null;
+                }
+                this.to_task.task.dependencies = this.to_task.task.dependencies.filter(d => d !== this.from_task.task.id);
+                this.gantt.arrows = this.gantt.arrows.filter(a => a !== this);
+                this.from_task.arrows = this.from_task.arrows.filter(a => a !== this);
+                let is_used = false;
+                this.from_task.arrows.forEach(a => {
+                    if (a.endpoint === this.endpoint)
+                        is_used = true;
+                });
+                this.endpoint.is_used = is_used;
+                this.endpoint.style.opacity = is_used ? 1 : null;
+                this.to_task.arrows = this.to_task.arrows.filter(a => a !== this);
+            });
         }
 
         draw() {
@@ -956,6 +1000,7 @@ var Gantt = (function () {
                 'data-from': this.from_task.task.id,
                 'data-to': this.to_task.task.id
             });
+            this.setup_click_event();
         }
 
         update() {
@@ -1239,7 +1284,6 @@ var Gantt = (function () {
             // wrapper element
             this.$container = document.createElement('div');
             this.$container.classList.add('gantt-container');
-        
 
             const parent_element = this.$svg.parentElement;
             parent_element.appendChild(this.$swimlanes_container);
@@ -2040,10 +2084,8 @@ var Gantt = (function () {
                             }
                         }
                     } else if (is_dragging) {
-                        if (parent_bar_id === bar.task.id) {
-                            if (start_drag && end_drag) {
+                        if (start_drag && end_drag) {
                                 bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
-                            }
                         }
                     }
                 });
@@ -2137,17 +2179,18 @@ var Gantt = (function () {
 
             $.on(this.$svg,'click','.endpoint', (e, element) => {
                 const bar_wrapper = $.closest('.bar-wrapper', element);
+                
+                if (element.classList.contains('start')) {
+                    return;
+                }
 
                 if (from_bar == null) {
                     from_bar = this.get_bar(bar_wrapper.getAttribute('data-id'));
                     this.bars.forEach( (b) => {
                         if (from_bar != b && !b.task.dependencies.includes(from_bar.task.id)) {
-                            b.$endpoint_start.style.opacity = 1;
-                            b.$endpoint_start.style.fill = 'green';
                             b.$endpoint_end.style.opacity = 1;
                             b.$endpoint_end.style.fill = 'green';
                         } else {
-                            b.$endpoint_start.style.visibility = 'hidden';
                             b.$endpoint_end.style.visibility = 'hidden';
                         }
                     });
@@ -2167,6 +2210,7 @@ var Gantt = (function () {
                         this.arrows.push(arrow);
                         from_bar.arrows.push(arrow);
                         to_bar.arrows.push(arrow);
+                        this.trigger_event('dependency_added', [from_bar.task.id]);
                     }
 
                     [from_bar, to_bar] = this.reset_endpoints();
@@ -2185,9 +2229,13 @@ var Gantt = (function () {
         }
 
         reset_endpoints() {
-            this.bars.forEach( (b) => {
-                b.$endpoint_start.removeAttribute('style');
-                b.$endpoint_end.removeAttribute('style');
+            this.bars.forEach((b) => {
+                b.$endpoint_end.style.fill = null;
+                if (!b.$endpoint_end.is_used) {
+                    b.$endpoint_end.style.opacity = null;
+                }
+
+                b.$endpoint_end.style.visibility = null;
             });
 
             return [null,null];

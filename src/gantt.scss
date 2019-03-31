@@ -41,6 +41,7 @@ $handle-color: #ddd !default;
 	}
 
 	.arrow {
+		cursor: pointer;
 		fill: none;
 		stroke: $text-muted;
 		stroke-width: 1.4;
@@ -111,8 +112,14 @@ $handle-color: #ddd !default;
 				opacity: 1;
 			}
 
-			.endpoint {
+			.endpoint.end {
+				cursor: copy;
+				stroke: cyan;
+				stroke-width: 1px;
 				opacity: 1;
+			}
+			.endpoint.start {
+				cursor: default;
 			}
 		}
 
