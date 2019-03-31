@@ -630,7 +630,7 @@ var Gantt = (function () {
         }
 
         setup_click_event() {
-            $.on(this.bar_group, 'focus ' + this.gantt.options.popup_trigger, e => {
+            $.on(this.inner_bar_group, 'focus ' + this.gantt.options.popup_trigger, e => {
                 if (this.action_completed) {
                     // just finished a move action, wait for a few seconds
                     return;
@@ -648,7 +648,6 @@ var Gantt = (function () {
         }
 
         show_popup() {
-            console.log(this.gantt.bar_being_dragged);
             if (this.gantt.bar_being_dragged) return;
 
             const start_date = date_utils.format(this.task._start, 'MMM D');
@@ -1035,11 +1034,164 @@ var Gantt = (function () {
         }
     }
 
+    class Swimlane {
+        constructor(gantt, swimlane) {
+            this.gantt = gantt;
+            this.parent = gantt.$svg_swimlanes;
+            this.swimlane = swimlane;
+
+            this.set_defaults();
+            this.make();
+        }
+
+        set_defaults() {
+            this.longest_title_width = this.parent.longest_title_width;
+            this.longest_sub_title_width = this.parent.longest_sub_title_width;
+            this.container_width = this.parent.getBoundingClientRect().width;
+            this.padding = this.gantt.options.padding;
+            this.swimlanes_map = this.gantt.swimlanes_map;
+            this.row_height = this.gantt.row_height;
+            this.header_height = this.gantt.header.getBoundingClientRect().height;
+        }
+
+        make() {
+            this.make_main_cell();
+            this.make_sub_cells();
+        }
+
+        make_main_cell() {
+            this.swimlane_group = createSVG('g', {
+                class: 'swimlane',
+                id: this.swimlane,
+                append_to: this.parent
+            });
+
+
+            this.title = createSVG('text', {
+                x: this.padding,
+                y: 0,
+                innerHTML: this.swimlane,
+                class: 'swimlane-label',
+                append_to: this.swimlane_group
+            });
+
+            this.main_cell = createSVG('rect', {
+                x: 0,
+                y: 0,
+                width: this.container_width,
+                height: 0,
+                class: 'swimlane-row',
+                append_to: this.swimlane_group
+            });
+
+            this.swimlane_group.appendChild(this.title);
+
+        }
+
+        make_sub_cells() {
+            this.from_row = Number.MAX_SAFE_INTEGER;
+            this.to_row = 0;
+
+            for (var sub_swimlane in this.swimlanes_map[this.swimlane]) {
+
+                let row_index = this.swimlanes_map[this.swimlane][sub_swimlane];
+
+                this.from_row = row_index < this.from_row ? row_index : this.from_row;
+                this.to_row = row_index > this.to_row ? row_index : this.to_row;
+
+                if (!sub_swimlane.includes('undefined')) {
+                    let sub_swimlanes_group = createSVG('g', {
+                        class: 'sub-swimlane',
+                        id: sub_swimlane,
+                        append_to: this.swimlane_group
+                    });
+
+                    let y_coord = this.gantt.get_y_coord_of_row(row_index);
+
+                    let sub_title = createSVG('text', {
+                        x: 0,
+                        y: (row_index === 0 ? this.header_height : y_coord) + 3 * this.row_height / 5,
+                        innerHTML: sub_swimlane,
+                        class: 'sub-swimlane-label',
+                        append_to: sub_swimlanes_group
+                    });
+
+                    let finale_x_coord = this.container_width - this.longest_sub_title_width - this.padding;
+                    createSVG('rect', {
+                        x: finale_x_coord,
+                        y: row_index === 0 ? this.header_height : y_coord,
+                        width: this.longest_sub_title_width + this.padding,
+                        height: this.row_height,
+                        class: 'sub-swimlane-row',
+                        append_to: sub_swimlanes_group
+                    });
+
+                    $.attr(sub_title, 'x', finale_x_coord + this.padding / 2);
+                    sub_swimlanes_group.appendChild(sub_title);
+                }
+            }
+
+            this.update_main_cell_position();
+        }
+
+        update_main_cell_position() {
+            let y_coord_from = this.gantt.get_y_coord_of_row(this.from_row);
+
+            $.attr(this.title, 'y', (this.from_row === 0 ? this.header_height : y_coord_from)
+                + (this.row_height * (this.to_row - this.from_row + 1) / 2) + this.title.getBoundingClientRect().height / 4);
+            $.attr(this.main_cell, 'y', (this.from_row === 0 ? this.header_height : y_coord_from));
+            $.attr(this.main_cell, 'height', this.row_height * (this.to_row - this.from_row + 1));
+        }
+
+        /*
+         * is_title == true => returns width of the biggest text svg element with swimlane title
+         * is_title == false => returns width of the biggest text svg element with swimlane subtitle
+         */
+        static get_longest_title_width(gantt, is_title) {
+
+            let max = 0;
+            let longest_title;
+            gantt.tasks.forEach((task) => {
+                if (is_title && task.swimlane !== undefined) {
+                    if (task.swimlane.length > max) {
+                        max = task.swimlane.length;
+                        longest_title = task.swimlane;
+                    }
+                }
+                if (!is_title && task.sub_swimlane !== undefined) {
+                    if (task.sub_swimlane.length > max) {
+                        max = task.sub_swimlane.length;
+                        longest_title = task.sub_swimlane;
+                    }
+                }
+            });
+
+            let swimlane_group = createSVG('g', {
+                class: 'swimlane',
+                append_to: gantt.$svg_swimlanes
+            });
+
+            let title = createSVG('text', {
+                x: gantt.options.padding,
+                y: 0,
+                innerHTML: longest_title,
+                class: 'swimlane-label',
+                append_to: swimlane_group
+            });
+
+            let result = title.getBBox().width;
+            gantt.$svg_swimlanes.innerHTML = '';
+
+            return result;
+        }
+    }
+
     class Gantt {
 
         constructor(wrapper, tasks, options) {
             this.setup_wrapper(wrapper);
             this.setup_options(options);
+            this.setup_swimlanes(tasks);
             this.setup_tasks(tasks);
             // initialize with default view mode
             this.change_view_mode();
@@ -1079,16 +1231,26 @@ var Gantt = (function () {
                 this.$svg.classList.add('gantt');
             }
 
+            // swimlane wrapper
+            this.$swimlanes_container = document.createElement('div');
+            this.$swimlanes_container.style.cssFloat = 'left';
+            this.$swimlanes_container.classList.add('gantt-swimlanes-container');
+
             // wrapper element
             this.$container = document.createElement('div');
-            //this.$container.style.cssFloat = 'right';
-            this.$container.style.display = 'inline-block';
-            this.$container.style.width = '75%';
             this.$container.classList.add('gantt-container');
+        
 
             const parent_element = this.$svg.parentElement;
+            parent_element.appendChild(this.$swimlanes_container);
             parent_element.appendChild(this.$container);
             this.$container.appendChild(this.$svg);
+
+            this.$svg_swimlanes = createSVG('svg', {
+                append_to: this.$swimlanes_container,
+                class: 'gantt-swimlanes'
+            });
+            this.$swimlanes_container.appendChild(this.$svg_swimlanes);
 
             // popup wrapper
             this.popup_wrapper = document.createElement('div');
@@ -1122,7 +1284,22 @@ var Gantt = (function () {
             this.options = Object.assign({}, default_options, options);
         }
 
+        setup_defaults() {
+
+            this.row_height = this.options.bar_height + this.options.padding;
+        
+            this.row_width = this.dates.length * this.options.column_width;
+
+            this.table_height = this.options.header_height + this.options.padding / 2 +
+                    (this.row_height) * (this.tasks.length == 0 ? 5 : this.indexed_tasks.length + 1);
+        
+            this.table_width = this.dates.length * this.options.column_width;
+
+        
+        }
+
         setup_tasks(tasks) {
+            this.indexed_tasks = [];
             // prepare tasks
             this.tasks = tasks.map((task, i) => {
                 // convert to Date objects
@@ -1134,8 +1311,12 @@ var Gantt = (function () {
                     task.end = null;
                 }
 
+
                 // cache index
-                task._index = i;
+                task._index = ((this.swimlanes_map[task.swimlane]) === undefined ? i :
+                 (this.swimlanes_map[task.swimlane][task.sub_swimlane] !== undefined ? this.swimlanes_map[task.swimlane][task.sub_swimlane] : i));
+
+                if (!this.indexed_tasks.includes(task._index)) this.indexed_tasks.push(task._index);
 
                 // invalid dates
                 if (!task.start && !task.end) {
@@ -1183,7 +1364,7 @@ var Gantt = (function () {
 
                 return task;
             });
-
+            this.remove_empty_rows();
             this.setup_dependencies();
         }
 
@@ -1197,7 +1378,46 @@ var Gantt = (function () {
             }
         }
 
+        remove_empty_rows() {
+            let rows = [...Array(this.tasks.length).keys()];
+            rows = (rows.filter(n => !this.indexed_tasks.includes(n)));
+            rows.forEach((i) => {
+                this.tasks.forEach((task) => {
+                    if (task._index > i) {
+                        task._index -= 1;
+                    }
+                });
+
+                for ( var swimlane in this.swimlanes_map ) {
+                    for (var swimlane_line in this.swimlanes_map[swimlane]) {
+                        let index = this.swimlanes_map[swimlane][swimlane_line];
+                        if (index > i) {
+                            this.swimlanes_map[swimlane][swimlane_line] -= 1;
+                        }
+                    }
+                }
+            });
+        }
+
+        setup_swimlanes(tasks) {
+            this.swimlanes_map = {};
+            tasks.map((task,i) => {
+                if (task.swimlane !== undefined) {
+                        this.swimlanes_map[task.swimlane] = this.swimlanes_map[task.swimlane] ||  {}; 
+                        if (isNaN(this.swimlanes_map[task.swimlane][task.sub_swimlane])) {
+                            if (task.sub_swimlane === undefined) {
+                                this.swimlanes_map[task.swimlane]['undefined' + task.id ] = i;
+                            } else {
+                                this.swimlanes_map[task.swimlane][task.sub_swimlane] = i;
+                            }
+                        }                                                                   
+                }
+            });
+            console.log(this.swimlanes_map);
+        }
+
         refresh(tasks) {
+            this.setup_swimlanes(tasks);
             this.setup_tasks(tasks);
             this.change_view_mode();
         }
@@ -1205,6 +1425,7 @@ var Gantt = (function () {
         change_view_mode(mode = this.options.view_mode) {
             this.update_view_scale(mode);
             this.setup_dates();
+            this.setup_defaults();
             this.render();
             // fire viewmode_change event
             this.trigger_event('view_change', [mode]);
@@ -1315,6 +1536,7 @@ var Gantt = (function () {
             this.map_arrows_on_bars();
             this.set_width();
             this.set_scroll_position();
+            this.make_swimlanes();
             this.reload_popup();
         }
 
@@ -1339,14 +1561,10 @@ var Gantt = (function () {
         }
 
         make_grid_background() {
-            const grid_width = this.dates.length * this.options.column_width;
-            const grid_height =
-                this.options.header_height +
-                this.options.padding +
-                (this.options.bar_height + this.options.padding) *
-                    (this.tasks.length == 0 ? 5 : this.tasks.length);
+            const grid_width = this.table_width;
+            const grid_height = this.table_height;
 
-            createSVG('rect', {
+            this.grid_background = createSVG('rect', {
                 x: 0,
                 y: 0,
                 width: grid_width,
@@ -1365,12 +1583,12 @@ var Gantt = (function () {
             const rows_layer = createSVG('g', { append_to: this.layers.grid });
             const lines_layer = createSVG('g', { append_to: this.layers.grid });
 
-            const row_width = this.dates.length * this.options.column_width;
-            const row_height = this.options.bar_height + this.options.padding;
+            const row_width = this.row_width;
+            const row_height = this.row_height;
 
             let row_y = this.options.header_height + this.options.padding / 2;
 
-            for ( var i = 0; i <= (this.tasks.length == 0 ? 5 : this.tasks.length); i++) {
+            for ( var i = 0; i <= (this.tasks.length == 0 ? 5 : this.indexed_tasks.length); i++) {
                 createSVG('rect', {
                     x: 0,
                     y: row_y,
@@ -1394,9 +1612,9 @@ var Gantt = (function () {
         }
 
         make_grid_header() {
-            const header_width = this.dates.length * this.options.column_width;
+            const header_width = this.row_width;
             const header_height = this.options.header_height + 10;
-            createSVG('rect', {
+            this.header = createSVG('rect', {
                 x: 0,
                 y: 0,
                 width: header_width,
@@ -1409,9 +1627,7 @@ var Gantt = (function () {
         make_grid_ticks() {
             let tick_x = 0;
             let tick_y = this.options.header_height + this.options.padding / 2;
-            let tick_height =
-                (this.options.bar_height + this.options.padding) *
-                this.tasks.length;
+            let tick_height = (this.row_height) * this.indexed_tasks.length;
 
             for (let date of this.dates) {
                 let tick_class = 'tick';
@@ -1459,9 +1675,8 @@ var Gantt = (function () {
                 const y = 0;
 
                 const width = this.options.column_width;
-                const height =
-                    (this.options.bar_height + this.options.padding) *
-                        this.tasks.length +
+                const height = this.row_height *
+                    this.indexed_tasks.length +
                     this.options.header_height +
                     this.options.padding / 2;
 
@@ -1599,6 +1814,60 @@ var Gantt = (function () {
             };
         }
 
+        make_swimlanes() {
+            if (this.tasks.length == 0) {
+                return;
+            }
+            
+            this.$svg_swimlanes.longest_title_width = Swimlane.get_longest_title_width(this,true);
+            this.$svg_swimlanes.longest_sub_title_width = Swimlane.get_longest_title_width(this,false);
+            const finale_container_width = this.$svg_swimlanes.longest_title_width + this.$svg_swimlanes.longest_sub_title_width
+                + 3 * this.options.padding;
+
+            $.attr(this.$svg_swimlanes, 'height', this.table_height + 1);
+            $.attr(this.$svg_swimlanes, 'width', finale_container_width);
+            
+            createSVG('rect', {
+                x: 0,
+                y: this.header.getBoundingClientRect().height,
+                width: finale_container_width,
+                height: this.table_height - this.header.getBoundingClientRect().height,
+                class: 'swimlanes-background',
+                append_to: this.$svg_swimlanes
+            });
+
+            createSVG('rect', {
+                x: 0,
+                y: 0,
+                width: finale_container_width,
+                height: this.header.getBoundingClientRect().height,
+                class: 'swimlanes-header',
+                append_to: this.$svg_swimlanes
+            });
+
+            for (var swimlane in this.swimlanes_map) {
+                new Swimlane(this, swimlane);
+            }
+
+            createSVG('line', {
+                x1: 0,
+                y1: this.get_y_coord_of_row(this.indexed_tasks[this.indexed_tasks.length - 1 ]) + this.row_height,
+                x2: this.row_width,
+                y2: this.get_y_coord_of_row(this.indexed_tasks[this.indexed_tasks.length - 1]) + this.row_height,
+                class: 'separator',
+                append_to: this.$svg_swimlanes
+            });
+
+            createSVG('line', {
+                x1: finale_container_width,
+                y1: 0,
+                x2: finale_container_width,
+                y2: this.table_height,
+                class: 'separator',
+                append_to: this.$svg_swimlanes
+            });
+        }
+
         make_bars() {
             this.bars = this.tasks.map(task => {
                 const bar = new Bar(this, task);
@@ -1623,8 +1892,8 @@ var Gantt = (function () {
                         if (!dependency) return;
                         const arrow = new Arrow(
                             this,
-                            this.bars[dependency._index], // from_task
-                            this.bars[task._index] // to_task
+                            this.get_bar(dependency.id), // from_task
+                            this.get_bar(task.id) // to_task
                         );
                         this.layers.arrow.appendChild(arrow.element);
                         return arrow;
@@ -1912,6 +2181,7 @@ var Gantt = (function () {
                     [from_bar, to_bar] = this.reset_endpoints();
                 }
             );
+            
         }
 
         reset_endpoints() {
@@ -2002,6 +2272,11 @@ var Gantt = (function () {
             });
         }
 
+        get_y_coord_of_row(row) {
+            return this.options.header_height + this.options.padding / 2 +
+                this.row_height * row;
+        }
+
         show_popup(options) {
             if (!this.popup) {
                 this.popup = new Popup(
@@ -2044,6 +2319,7 @@ var Gantt = (function () {
          */
         clear() {
             this.$svg.innerHTML = '';
+            this.$svg_swimlanes.innerHTML = '';
         }
     }
 

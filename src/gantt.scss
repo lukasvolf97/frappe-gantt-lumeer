@@ -143,6 +143,58 @@ $handle-color: #ddd !default;
 	}
 }
 
+.gantt-swimlanes-container {
+	position: relative;
+	overflow: auto;
+	font-size: 12px;
+
+	.gantt-swimlanes {
+
+		.swimlanes-header {
+			fill: #ffffff;
+			stroke: $border-color;
+			stroke-width: 1.4;
+		}
+
+		.swimlanes-background {
+			fill: #ffffff;
+			stroke: $border-color;
+			stroke-width: 1.4;
+		}
+
+		.separ {
+			stroke: $light-border-color;
+		}
+
+		.swimlane {
+			.swimlane-label {
+				padding: 10px;
+				fill: black;
+			}
+			.swimlane-row {
+				fill: #ffffff;
+				stroke: $border-color;
+				stroke-width: 1.4;
+			}
+
+		.sub-swimlane {	
+		
+			.sub-swimlane-label {
+				padding: 10px;
+				fill: black;
+				}
+
+			.sub-swimlane-row{
+				padding: 10px;
+				fill: #ffffff;
+				stroke: $border-color;
+				stroke-width: 1.4;
+				}
+			}
+		}
+	}
+}
+
 .gantt-container {
 	position: relative;
 	overflow: auto;

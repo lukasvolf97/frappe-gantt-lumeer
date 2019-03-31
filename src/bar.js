@@ -227,7 +227,7 @@ export default class Bar {
     }
 
     setup_click_event() {
-        $.on(this.bar_group, 'focus ' + this.gantt.options.popup_trigger, e => {
+        $.on(this.inner_bar_group, 'focus ' + this.gantt.options.popup_trigger, e => {
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
@@ -245,7 +245,6 @@ export default class Bar {
     }
 
     show_popup() {
-        console.log(this.gantt.bar_being_dragged);
         if (this.gantt.bar_being_dragged) return;
 
         const start_date = date_utils.format(this.task._start, 'MMM D');

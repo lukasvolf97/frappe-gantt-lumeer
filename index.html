@@ -24,14 +24,12 @@
 	<div class="container">
 		<h2>Interactive Gantt Chart entirely made in SVG!</h2>
 		<div class="gantt-target"></div>
-
-		<button type="button" onclick='gantt_chart.change_view_mode("Day")'>Day</button>
+	</div>
+			<button type="button" onclick='gantt_chart.change_view_mode("Day")'>Day</button>
 		<button type="button" onclick='gantt_chart.change_view_mode("Month")'>Month</button>
 		<button type="button" onclick='gantt_chart.change_view_mode("Year")'>Year</button>
 		<button type="button" onclick='gantt_chart.refresh([])'>Empty Tasks</button>
 		<button type="button" onclick='gantt_chart.refresh(tasks)'>Fill with Tasks</button>
-		
-	</div>
 	<script>
 		var tasks = [
 			{
@@ -40,7 +38,7 @@
 				name: 'Redesign website',
 				id: "Task 0",
 				swimlane: "First steps",
-				swimlane_part: "1. item",
+				sub_swimlane: "3. item",
 				primary_color: 'black',
 				start_drag: false,
 				progress: 120
@@ -52,7 +50,7 @@
 				id: "Task 1",
 				progress: 5,
 				swimlane: "First steps",
-				swimlane_part: "2. item",
+				sub_swimlane: "3. item",
 				end_drag: false,
 			},
 			{
@@ -61,7 +59,8 @@
 				name: 'Apply new styles',
 				id: "Task 2",
 				text_color: "black",
-				swimlane: "Second one",
+				swimlane: "First steps",
+				sub_swimlane: "2. item",
 				secondary_color: 'green',
 				progress: 10,
 				dependencies: 'Task 1'
@@ -72,6 +71,8 @@
 				name: 'Review',
 				id: "Task 3",
 				text_color: "red",
+				swimlane: "Next steps",
+				sub_swimlane: "1. item",
 				progress: 5,
 				dependencies: 'Task 2'
 			},
@@ -79,9 +80,10 @@
 				start: '2018-10-08',
 				end: '2018-10-10',
 				name: 'Deploy',
-				id: "Task 4",
+				id: "Task 4",		
 				progress: 0,
-				dependencies: 'Task 2'
+				dependencies: 'Task 2',
+				swimlane: "Other steps"
 			},
 			{
 				start: '2018-10-11',
@@ -90,7 +92,8 @@
 				id: "Task 5",
 				progress: 0,
 				dependencies: 'Task 4',
-				custom_class: 'bar-milestone'
+				custom_class: 'bar-milestone',
+				swimlane: "Other steps",
 			}/*,
 			{
 				start: '2014-01-05',

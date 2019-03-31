@@ -100,6 +100,36 @@
 .gantt .hide {
   display: none; }
 
+.gantt-swimlanes-container {
+  position: relative;
+  overflow: auto;
+  font-size: 12px; }
+  .gantt-swimlanes-container .gantt-swimlanes .swimlanes-header {
+    fill: #ffffff;
+    stroke: #e0e0e0;
+    stroke-width: 1.4; }
+  .gantt-swimlanes-container .gantt-swimlanes .swimlanes-background {
+    fill: #ffffff;
+    stroke: #e0e0e0;
+    stroke-width: 1.4; }
+  .gantt-swimlanes-container .gantt-swimlanes .separ {
+    stroke: #ebeff2; }
+  .gantt-swimlanes-container .gantt-swimlanes .swimlane .swimlane-label {
+    padding: 10px;
+    fill: black; }
+  .gantt-swimlanes-container .gantt-swimlanes .swimlane .swimlane-row {
+    fill: #ffffff;
+    stroke: #e0e0e0;
+    stroke-width: 1.4; }
+  .gantt-swimlanes-container .gantt-swimlanes .swimlane .sub-swimlane .sub-swimlane-label {
+    padding: 10px;
+    fill: black; }
+  .gantt-swimlanes-container .gantt-swimlanes .swimlane .sub-swimlane .sub-swimlane-row {
+    padding: 10px;
+    fill: #ffffff;
+    stroke: #e0e0e0;
+    stroke-width: 1.4; }
+
 .gantt-container {
   position: relative;
   overflow: auto;
