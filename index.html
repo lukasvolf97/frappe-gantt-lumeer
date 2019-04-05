@@ -42,7 +42,9 @@
 				primary_color: 'black',
 				start_drag: false,
 				progress: 120,
-				dependencies: 'Task 1'
+				dependencies: 'Task 1',
+				//custom class:custom text:name of task property to show
+				to_show_in_popup: "new-progress:My Custom Progress Text:progress, new-dependencies::dependencies, new-drag:Is it allowed to change start date?:start_drag"
 			},
 			{
 				start: '2018-10-03',
@@ -122,6 +124,21 @@
 			on_view_change: function(mode) {
 				console.log(mode);
 			},
+		/*	custom_popup_html : function (task) {
+				return `
+            	<div class="title">` + task.name + `</div>
+				<div class="subtitle"> Progress: ` + task.progress + `</div>	
+				<div class="subtitle"> Can u change the start date?
+					` + ((task.start_drag === undefined || task.start_drag === true) ? 'Yes' : 'No') + `
+				</div> ` 
+				+ (task.secondary_color ? `
+					'<div class="subtitle"> Custom secondary color set to:
+						<svg height = "10" width = "10"> 
+							<rect x="0" y="0" height = "10" width = "10" rx = "3" ry = "3" style = "fill: `+ task.secondary_color + `" ></rect>
+						</svg> 
+					</div>
+					`: '');
+			},*/
 			view_mode: 'Day',
 			language: 'en'
 		});

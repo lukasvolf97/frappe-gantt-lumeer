@@ -843,8 +843,8 @@ export default class Gantt {
                             (!end_drag && $bar.ox + $bar.finaldx < $bar.ox + $bar.owidth)) {
                             bar.update_bar_position({
                             x: $bar.ox + $bar.finaldx,
-                            width : $bar.owidth - $bar.finaldx
-                            });                              
+                                width: $bar.owidth - $bar.finaldx
+                            });
                         }
                     } else if (start_drag && end_drag) {  
                             bar.update_bar_position({
@@ -856,7 +856,12 @@ export default class Gantt {
                         if (end_drag && $bar.owidth + $bar.finaldx > 0) {
                             bar.update_bar_position({
                             width: $bar.owidth + $bar.finaldx
-                        });
+                            });
+                            //update popup position
+                            let position_meta = $bar.getBBox();
+                            position_meta = position_meta.x + (position_meta.width + 10) + 'px';
+            
+                            this.popup_wrapper.style.left = position_meta;
                         }
                     }
                 } else if (is_dragging) {
@@ -942,10 +947,12 @@ export default class Gantt {
         });
 
         $.on(this.$svg, 'mouseup', () => {
-            is_resizing = false;
-            if (!($bar_progress && $bar_progress.finaldx)) return;
-            bar.progress_changed();
-            bar.set_action_completed();
+            if (is_resizing) {
+                is_resizing = false;
+                if (!($bar_progress && $bar_progress.finaldx)) return;
+                bar.progress_changed();
+                bar.set_action_completed();
+            }
         });
     }
 

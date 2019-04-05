@@ -226,6 +226,21 @@ $handle-color: #ddd !default;
 			color: #dfe2e5;
 		}
 
+
+		.new-progress {
+			padding: 10px;
+			color: red;
+		}
+		.new-dependencies {
+			padding: 10px;
+			color: red;
+		}
+		.new-drag {
+			padding: 10px;
+			color: red;
+		}
+
+
 		.pointer {
 			position: absolute;
 			height: 5px;

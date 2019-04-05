@@ -635,7 +635,6 @@ var Gantt = (function () {
                     // just finished a move action, wait for a few seconds
                     return;
                 }
-
                 if (e.type === 'click') {
                     this.gantt.trigger_event('click', [this.task]);
                 }
@@ -728,7 +727,12 @@ var Gantt = (function () {
 
         set_action_completed() {
             this.action_completed = true;
-            setTimeout(() => (this.action_completed = false), 1000);
+            if (this.timer == undefined) {
+                this.timer = setTimeout(() => {
+                    this.action_completed = false;
+                    this.timer = undefined;
+                }, 1000);
+            }
         }
 
         compute_start_end_date() {
@@ -1047,9 +1051,24 @@ var Gantt = (function () {
                 this.pointer = this.parent.querySelector('.pointer');
             } else {
                 // set data
-                this.title.innerHTML = options.title;
-                this.subtitle.innerHTML = options.subtitle;
-                this.parent.style.width = this.parent.clientWidth + 'px';
+                if (typeof options.task.to_show_in_popup === 'string') {
+                    this.parent.innerHTML = '<div class="title">'+ options.title +'</div>';
+                    let to_show = options.task.to_show_in_popup.split(',');
+                    to_show.forEach((item_with_class) => {
+                        let class_item = item_with_class.split(':');
+                        this.parent.innerHTML += `
+                    <div class="` + (class_item[0].length == 0 ? 'subtitle' : class_item[0]) + '">'
+                            + (class_item[1].length == 0 ? '' : class_item[1] + ': ') + options.task[class_item[2]] +
+                            '</div>';
+                    });
+                    this.parent.innerHTML += '<div class="pointer"></div>';
+                    this.pointer = this.parent.querySelector('.pointer');
+                } else {
+                    this.make();
+                    this.title.innerHTML = options.title;
+                    this.subtitle.innerHTML = options.subtitle;
+                    this.parent.style.width = this.parent.clientWidth + 'px';
+                }
             }
 
             // set position
@@ -2067,8 +2086,8 @@ var Gantt = (function () {
                                 (!end_drag && $bar.ox + $bar.finaldx < $bar.ox + $bar.owidth)) {
                                 bar.update_bar_position({
                                 x: $bar.ox + $bar.finaldx,
-                                width : $bar.owidth - $bar.finaldx
-                                });                              
+                                    width: $bar.owidth - $bar.finaldx
+                                });
                             }
                         } else if (start_drag && end_drag) {  
                                 bar.update_bar_position({
@@ -2080,7 +2099,12 @@ var Gantt = (function () {
                             if (end_drag && $bar.owidth + $bar.finaldx > 0) {
                                 bar.update_bar_position({
                                 width: $bar.owidth + $bar.finaldx
-                            });
+                                });
+                                //update popup position
+                                let position_meta = $bar.getBBox();
+                                position_meta = position_meta.x + (position_meta.width + 10) + 'px';
+                
+                                this.popup_wrapper.style.left = position_meta;
                             }
                         }
                     } else if (is_dragging) {
@@ -2166,10 +2190,12 @@ var Gantt = (function () {
             });
 
             $.on(this.$svg, 'mouseup', () => {
-                is_resizing = false;
-                if (!($bar_progress && $bar_progress.finaldx)) return;
-                bar.progress_changed();
-                bar.set_action_completed();
+                if (is_resizing) {
+                    is_resizing = false;
+                    if (!($bar_progress && $bar_progress.finaldx)) return;
+                    bar.progress_changed();
+                    bar.set_action_completed();
+                }
             });
         }
 

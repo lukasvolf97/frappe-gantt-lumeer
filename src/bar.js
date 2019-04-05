@@ -232,7 +232,6 @@ export default class Bar {
                 // just finished a move action, wait for a few seconds
                 return;
             }
-
             if (e.type === 'click') {
                 this.gantt.trigger_event('click', [this.task]);
             }
@@ -325,7 +324,12 @@ export default class Bar {
 
     set_action_completed() {
         this.action_completed = true;
-        setTimeout(() => (this.action_completed = false), 1000);
+        if (this.timer == undefined) {
+            this.timer = setTimeout(() => {
+                this.action_completed = false;
+                this.timer = undefined;
+            }, 1000);
+        }
     }
 
     compute_start_end_date() {

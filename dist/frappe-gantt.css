@@ -154,6 +154,15 @@
     .gantt-container .popup-wrapper .subtitle {
       padding: 10px;
       color: #dfe2e5; }
+    .gantt-container .popup-wrapper .new-progress {
+      padding: 10px;
+      color: red; }
+    .gantt-container .popup-wrapper .new-dependencies {
+      padding: 10px;
+      color: red; }
+    .gantt-container .popup-wrapper .new-drag {
+      padding: 10px;
+      color: red; }
     .gantt-container .popup-wrapper .pointer {
       position: absolute;
       height: 5px;
