@@ -36,7 +36,7 @@ export default class Gantt {
         } else {
             throw new TypeError(
                 'Frappé Gantt only supports usage of a string CSS selector,' +
-                    " HTML DOM element or SVG DOM element for the 'element' parameter"
+                " HTML DOM element or SVG DOM element for the 'element' parameter"
             );
         }
 
@@ -107,15 +107,15 @@ export default class Gantt {
     setup_defaults() {
 
         this.row_height = this.options.bar_height + this.options.padding;
-    
+
         this.row_width = this.dates.length * this.options.column_width;
 
         this.table_height = this.options.header_height + this.options.padding / 2 +
-                (this.row_height) * (this.tasks.length == 0 ? 5 : this.indexed_tasks.length + 1);
-    
+            (this.row_height) * (this.tasks.length == 0 ? 5 : this.indexed_tasks.length + 1);
+
         this.table_width = this.dates.length * this.options.column_width;
 
-    
+
     }
 
     setup_tasks(tasks) {
@@ -133,8 +133,9 @@ export default class Gantt {
 
 
             // cache index
-            task._index = ((this.swimlanes_map[task.swimlane]) === undefined ? i :
-             (this.swimlanes_map[task.swimlane][task.sub_swimlane] !== undefined ? this.swimlanes_map[task.swimlane][task.sub_swimlane] : i));
+            task._index = (task.swimlane === undefined ? this.swimlanes_map[task.id] :
+                (task.sub_swimlane !== undefined ? this.swimlanes_map[task.swimlane][task.sub_swimlane] :
+                    this.swimlanes_map[task.swimlane]['undefined' + task.id]));
 
             if (!this.indexed_tasks.includes(task._index)) this.indexed_tasks.push(task._index);
 
@@ -208,7 +209,7 @@ export default class Gantt {
                 }
             });
 
-            for ( var swimlane in this.swimlanes_map ) {
+            for (var swimlane in this.swimlanes_map) {
                 for (var swimlane_line in this.swimlanes_map[swimlane]) {
                     let index = this.swimlanes_map[swimlane][swimlane_line];
                     if (index > i) {
@@ -221,19 +222,35 @@ export default class Gantt {
 
     setup_swimlanes(tasks) {
         this.swimlanes_map = {};
-        tasks.map((task,i) => {
-            if (task.swimlane !== undefined) {
-                    this.swimlanes_map[task.swimlane] = this.swimlanes_map[task.swimlane] ||  {}; 
-                    if (isNaN(this.swimlanes_map[task.swimlane][task.sub_swimlane])) {
-                        if (task.sub_swimlane === undefined) {
-                            this.swimlanes_map[task.swimlane]['undefined' + task.id ] = i;
-                        } else {
-                            this.swimlanes_map[task.swimlane][task.sub_swimlane] = i;
+        let index = 0;
+        tasks.map((task) => {
+            if (task.swimlane !== undefined && task.used !== true) {
+                tasks.map((other_task) => {
+                    if (task.swimlane === other_task.swimlane) {
+                        this.swimlanes_map[other_task.swimlane] = this.swimlanes_map[other_task.swimlane] || {};
+                        if (isNaN(this.swimlanes_map[other_task.swimlane][other_task.sub_swimlane])) {
+                            if (other_task.sub_swimlane === undefined) {
+                                this.swimlanes_map[other_task.swimlane]['undefined' + other_task.id] = index;
+                            } else {
+                                this.swimlanes_map[other_task.swimlane][other_task.sub_swimlane] = index;
+                            }
+                            index += 1
+                            other_task.used = true;
                         }
-                    }                                                                   
+                    }
+                })
             }
         });
-        console.log(this.swimlanes_map);
+        //sent tasks with undefined swimlanes to the end of table
+        tasks.map((task) => {
+            if (task.swimlane === undefined) {
+                let swimlane_name = new String(task.id);
+                swimlane_name.invalid = true;
+                this.swimlanes_map[swimlane_name] = {};
+                this.swimlanes_map[swimlane_name] = index
+                index += 1
+            }
+        });
     }
 
     refresh(tasks) {
@@ -300,7 +317,7 @@ export default class Gantt {
             this.gantt_start = date_utils.start_of(this.gantt_start, 'day');
             this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
         }
- 
+
         // add date padding on both sides
         if (this.view_is(['Quarter Day', 'Half Day'])) {
             this.gantt_start = date_utils.add(this.gantt_start, -7, 'day');
@@ -408,7 +425,7 @@ export default class Gantt {
 
         let row_y = this.options.header_height + this.options.padding / 2;
 
-        for ( var i = 0; i <= (this.tasks.length == 0 ? 5 : this.indexed_tasks.length); i++) {
+        for (var i = 0; i <= (this.tasks.length == 0 ? 5 : this.indexed_tasks.length); i++) {
             createSVG('rect', {
                 x: 0,
                 y: row_y,
@@ -582,8 +599,8 @@ export default class Gantt {
             'Half Day_upper':
                 date.getDate() !== last_date.getDate()
                     ? date.getMonth() !== last_date.getMonth()
-                      ? date_utils.format(date, 'D MMM', this.options.language)
-                      : date_utils.format(date, 'D', this.options.language)
+                        ? date_utils.format(date, 'D MMM', this.options.language)
+                        : date_utils.format(date, 'D', this.options.language)
                     : '',
             Day_upper:
                 date.getMonth() !== last_date.getMonth()
@@ -638,15 +655,15 @@ export default class Gantt {
         if (this.tasks.length == 0) {
             return;
         }
-        
-        this.$svg_swimlanes.longest_title_width = Swimlane.get_longest_title_width(this,true);
-        this.$svg_swimlanes.longest_sub_title_width = Swimlane.get_longest_title_width(this,false);
+
+        this.$svg_swimlanes.longest_title_width = Swimlane.get_longest_title_width(this, true);
+        this.$svg_swimlanes.longest_sub_title_width = Swimlane.get_longest_title_width(this, false);
         const finale_container_width = this.$svg_swimlanes.longest_title_width + this.$svg_swimlanes.longest_sub_title_width
             + 3 * this.options.padding;
 
         $.attr(this.$svg_swimlanes, 'height', this.table_height + 1);
         $.attr(this.$svg_swimlanes, 'width', finale_container_width);
-        
+
         createSVG('rect', {
             x: 0,
             y: this.header.getBoundingClientRect().height,
@@ -666,12 +683,12 @@ export default class Gantt {
         });
 
         for (var swimlane in this.swimlanes_map) {
-            new Swimlane(this, swimlane);
+            if (swimlane.invalid !== true) new Swimlane(this, swimlane);
         }
 
         createSVG('line', {
             x1: 0,
-            y1: this.get_y_coord_of_row(this.indexed_tasks[this.indexed_tasks.length - 1 ]) + this.row_height,
+            y1: this.get_y_coord_of_row(this.indexed_tasks[this.indexed_tasks.length - 1]) + this.row_height,
             x2: this.row_width,
             y2: this.get_y_coord_of_row(this.indexed_tasks[this.indexed_tasks.length - 1]) + this.row_height,
             class: 'separator',
@@ -756,8 +773,8 @@ export default class Gantt {
 
         const scroll_pos =
             hours_before_first_task /
-                this.options.step *
-                this.options.column_width -
+            this.options.step *
+            this.options.column_width -
             this.options.column_width;
 
         parent_element.scrollLeft = scroll_pos;
@@ -835,38 +852,38 @@ export default class Gantt {
                 $bar.finaldx = this.get_snap_position(dx);
 
                 let start_drag = (bar.task.start_drag !== undefined) ? bar.task.start_drag : true
-                let end_drag = (bar.task.end_drag !== undefined) ? bar.task.end_drag : true     
+                let end_drag = (bar.task.end_drag !== undefined) ? bar.task.end_drag : true
 
                 if (is_resizing_left) {
                     if (parent_bar_id === bar.task.id) {
-                        if (start_drag && end_drag || 
+                        if (start_drag && end_drag ||
                             (!end_drag && $bar.ox + $bar.finaldx < $bar.ox + $bar.owidth)) {
                             bar.update_bar_position({
-                            x: $bar.ox + $bar.finaldx,
+                                x: $bar.ox + $bar.finaldx,
                                 width: $bar.owidth - $bar.finaldx
                             });
                         }
-                    } else if (start_drag && end_drag) {  
-                            bar.update_bar_position({
+                    } else if (start_drag && end_drag) {
+                        bar.update_bar_position({
                             x: $bar.ox + $bar.finaldx
-                            });
-                        }
+                        });
+                    }
                 } else if (is_resizing_right) {
-                    if (parent_bar_id === bar.task.id) {           
+                    if (parent_bar_id === bar.task.id) {
                         if (end_drag && $bar.owidth + $bar.finaldx > 0) {
                             bar.update_bar_position({
-                            width: $bar.owidth + $bar.finaldx
+                                width: $bar.owidth + $bar.finaldx
                             });
                             //update popup position
                             let position_meta = $bar.getBBox();
                             position_meta = position_meta.x + (position_meta.width + 10) + 'px';
-            
+
                             this.popup_wrapper.style.left = position_meta;
                         }
                     }
                 } else if (is_dragging) {
                     if (start_drag && end_drag) {
-                            bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+                        bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
                     }
                 }
             });
@@ -913,7 +930,7 @@ export default class Gantt {
             const $bar_wrapper = $.closest('.bar-wrapper', handle);
             const id = $bar_wrapper.getAttribute('data-id');
             bar = this.get_bar(id);
-            
+
             $bar_progress = bar.$bar_progress;
             $bar_progress_inner = bar.$bar_progress_inner;
             $bar = bar.$bar;
@@ -960,26 +977,26 @@ export default class Gantt {
         let from_bar = null;
         let to_bar = null;
 
-        $.on(this.$svg,'click','.endpoint', (e, element) => {
+        $.on(this.$svg, 'click', '.endpoint', (e, element) => {
             const bar_wrapper = $.closest('.bar-wrapper', element);
-            
+
             if (element.classList.contains('start')) {
                 return;
             }
 
             if (from_bar == null) {
                 from_bar = this.get_bar(bar_wrapper.getAttribute('data-id'));
-                this.bars.forEach( (b) => {
+                this.bars.forEach((b) => {
                     if (from_bar != b && !b.task.dependencies.includes(from_bar.task.id)) {
                         b.$endpoint_end.classList.add('endpoint-active');
                     }
                 });
             } else {
                 to_bar = this.get_bar(bar_wrapper.getAttribute('data-id'));
-                
+
                 if (from_bar != to_bar && to_bar.$endpoint_end.classList.contains('endpoint-active')) {
                     to_bar.task.dependencies.push(from_bar.task.id);
-                
+
                     const arrow = new Arrow(
                         this,
                         from_bar,
@@ -1005,7 +1022,7 @@ export default class Gantt {
                 [from_bar, to_bar] = this.reset_endpoints();
             }
         );
-        
+
     }
 
     reset_endpoints() {
@@ -1018,7 +1035,7 @@ export default class Gantt {
             b.$endpoint_end.style.visibility = null;
         });
 
-        return [null,null];
+        return [null, null];
     }
 
     get_all_dependent_tasks(task_id) {

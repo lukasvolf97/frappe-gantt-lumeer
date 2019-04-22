@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<title>Simple Gantt</title>
@@ -8,10 +9,12 @@
 			font-family: sans-serif;
 			background: #ccc;
 		}
+
 		.container {
 			width: 80%;
 			margin: 0 auto;
 		}
+
 		/* custom class */
 		.gantt .bar-milestone .bar {
 			fill: tomato;
@@ -20,16 +23,17 @@
 	<link rel="stylesheet" href="dist/frappe-gantt.css" />
 	<script src="dist/frappe-gantt.js"></script>
 </head>
+
 <body>
 	<div class="container">
 		<h2>Interactive Gantt Chart entirely made in SVG!</h2>
 		<div class="gantt-target"></div>
 	</div>
-			<button type="button" onclick='gantt_chart.change_view_mode("Day")'>Day</button>
-		<button type="button" onclick='gantt_chart.change_view_mode("Month")'>Month</button>
-		<button type="button" onclick='gantt_chart.change_view_mode("Year")'>Year</button>
-		<button type="button" onclick='gantt_chart.refresh([])'>Empty Tasks</button>
-		<button type="button" onclick='gantt_chart.refresh(tasks)'>Fill with Tasks</button>
+	<button type="button" onclick='gantt_chart.change_view_mode("Day")'>Day</button>
+	<button type="button" onclick='gantt_chart.change_view_mode("Month")'>Month</button>
+	<button type="button" onclick='gantt_chart.change_view_mode("Year")'>Year</button>
+	<button type="button" onclick='gantt_chart.refresh([])'>Empty Tasks</button>
+	<button type="button" onclick='gantt_chart.refresh(tasks)'>Fill with Tasks</button>
 	<script>
 		var tasks = [
 			{
@@ -52,7 +56,7 @@
 				name: 'Write new content',
 				id: "Task 1",
 				progress: 5,
-				swimlane: "First steps",
+				swimlane: "Second step",
 				sub_swimlane: "3. item",
 				//sub_swimlane: "1. item",
 				end_drag: false,
@@ -84,7 +88,7 @@
 				start: '2018-10-08',
 				end: '2018-10-10',
 				name: 'Deploy',
-				id: "Task 4",		
+				id: "Task 4",
 				progress: 0,
 				dependencies: 'Task 2',
 				swimlane: "Other steps"
@@ -116,23 +120,23 @@
 			on_dependency_added: function (dependency) {
 				console.log(dependency);
 			},
-			on_date_change: function(task, start, end) {
+			on_date_change: function (task, start, end) {
 				console.log(task, start, end);
 			},
-			on_progress_change: function(task, progress) {
+			on_progress_change: function (task, progress) {
 				console.log(task, progress);
 			},
-			on_view_change: function(mode) {
+			on_view_change: function (mode) {
 				console.log(mode);
 			},
-	custom_popup_html : function (task) {
+			custom_popup_html: function (task) {
 				return `
             	<div class="title">` + task.name + `</div>
 				<div class="subtitle"> Progress: ` + task.progress + `</div>	
 				<div class="subtitle"> Can u change the start date?
 					` + ((task.start_drag === undefined || task.start_drag === true) ? 'Yes' : 'No') + `
-				</div> ` 
-				+ (task.secondary_color ? `
+				</div> `
+					+ (task.secondary_color ? `
 					'<div class="subtitle"> Custom secondary color set to:
 						<svg height = "10" width = "10"> 
 							<rect x="0" y="0" height = "10" width = "10" rx = "3" ry = "3" style = "fill: `+ task.secondary_color + `" ></rect>
@@ -147,4 +151,5 @@
 		console.log(gantt_chart);
 	</script>
 </body>
+
 </html>

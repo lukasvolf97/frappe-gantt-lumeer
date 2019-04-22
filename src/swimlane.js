@@ -106,7 +106,7 @@ export default class Swimlane {
         $.attr(this.title, 'y', (this.from_row === 0 ? this.header_height : y_coord_from)
             + (this.row_height * (this.to_row - this.from_row + 1) / 2) + this.title.getBoundingClientRect().height / 4);
         $.attr(this.main_cell, 'y', (this.from_row === 0 ? this.header_height : y_coord_from));
-        $.attr(this.main_cell, 'height', this.row_height * (this.to_row - this.from_row + 1));
+        $.attr(this.main_cell, 'height', this.row_height * Math.abs(this.to_row - this.from_row + 1));
     }
 
     /*
