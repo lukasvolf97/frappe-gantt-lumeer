@@ -971,16 +971,13 @@ export default class Gantt {
                 from_bar = this.get_bar(bar_wrapper.getAttribute('data-id'));
                 this.bars.forEach( (b) => {
                     if (from_bar != b && !b.task.dependencies.includes(from_bar.task.id)) {
-                        b.$endpoint_end.style.opacity = 1;
-                        b.$endpoint_end.style.fill = 'green';
-                    } else {
-                        b.$endpoint_end.style.visibility = 'hidden';
+                        b.$endpoint_end.classList.add('endpoint-active');
                     }
                 });
             } else {
                 to_bar = this.get_bar(bar_wrapper.getAttribute('data-id'));
                 
-                if (from_bar != to_bar) {
+                if (from_bar != to_bar && to_bar.$endpoint_end.classList.contains('endpoint-active')) {
                     to_bar.task.dependencies.push(from_bar.task.id);
                 
                     const arrow = new Arrow(
@@ -1013,7 +1010,7 @@ export default class Gantt {
 
     reset_endpoints() {
         this.bars.forEach((b) => {
-            b.$endpoint_end.style.fill = null;
+            b.$endpoint_end.classList.remove('endpoint-active')
             if (!b.$endpoint_end.is_used) {
                 b.$endpoint_end.style.opacity = null;
             }

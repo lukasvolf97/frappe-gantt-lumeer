@@ -71,6 +71,11 @@
   opacity: 0;
   transition: opacity .3s ease; }
 
+.gantt .endpoint-active {
+  fill: green;
+  opacity: 1;
+  transition: opacity .3s ease; }
+
 .gantt .bar-wrapper {
   cursor: pointer;
   outline: none; }

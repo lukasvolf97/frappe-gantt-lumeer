@@ -906,7 +906,7 @@ var Gantt = (function () {
                 this.gantt.options.padding;
 
             const from_is_below_to =
-                this.from_task.task._index > this.to_task.task._index;
+                this.from_task.task._index >= this.to_task.task._index;
             const curve = this.gantt.options.arrow_curve;
             const clockwise = from_is_below_to ? 1 : 0;
             const curve_y = from_is_below_to ? -curve : curve;
@@ -923,29 +923,17 @@ var Gantt = (function () {
             const left = this.to_task.$bar.getX() - this.gantt.options.padding;
 
             if (this.endpoint.getAttribute('class').includes('start')) {
-                if (this.to_task.$bar.getX() > this.from_task.$bar.getX()) {
-                    this.path = `
-                M ${start_x} ${start_y}
-                h ${-curve * 2}
-                a ${curve} ${curve} 0 0 ${clockwise} -${curve} ${curve_y}
-                V ${down_2}
-                a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
-                L ${end_x} ${end_y}
-                m -5 -5
-                l 5 5
-                l -5 5`;
-                } else {
-                    this.path = `
-                M ${start_x} ${start_y}
-                H ${left}
-                a ${curve} ${curve} 0 0 ${clockwise} -${curve} ${curve_y}
-                V ${down_2}
-                a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
-                L ${end_x} ${end_y}
-                m -5 -5
-                l 5 5
-                l -5 5`;
-                }
+                let h_attr = (this.to_task.$bar.getX() > this.from_task.$bar.getX()) ? `h ${-curve * 2}` : `H ${left}`;
+                this.path = `
+            M ${start_x} ${start_y}
+            ${h_attr}
+            a ${curve} ${curve} 0 0 ${clockwise} -${curve} ${curve_y}
+            V ${down_2}
+            a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
+            L ${end_x} ${end_y}
+            m -5 -5
+            l 5 5
+            l -5 5`;
             } else {
                 if (this.to_task.$bar.getX() <= this.from_task.$bar.getEndX()) {
                     this.path = `
@@ -961,14 +949,23 @@ var Gantt = (function () {
                 l 5 5
                 l -5 5`;
                 } else {
-                    this.path = `
-                M ${start_x} ${start_y}
-                V ${down_2}
-                a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
-                L ${end_x} ${end_y}
-                m -5 -5
-                l 5 5
-                l -5 5`;
+                    if (this.to_task.$bar.getY() !== this.from_task.$bar.getY()) {
+                        this.path = `
+                    M ${start_x} ${start_y}
+                    V ${down_2}
+                    a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
+                    L ${end_x} ${end_y}
+                    m -5 -5
+                    l 5 5
+                    l -5 5`;
+                    } else {
+                        this.path = `
+                    M ${start_x} ${start_y}
+                    L ${end_x} ${end_y}
+                    m -5 -5
+                    l 5 5
+                    l -5 5`;
+                    }
                 }
             }
         }
@@ -2214,16 +2211,13 @@ var Gantt = (function () {
                     from_bar = this.get_bar(bar_wrapper.getAttribute('data-id'));
                     this.bars.forEach( (b) => {
                         if (from_bar != b && !b.task.dependencies.includes(from_bar.task.id)) {
-                            b.$endpoint_end.style.opacity = 1;
-                            b.$endpoint_end.style.fill = 'green';
-                        } else {
-                            b.$endpoint_end.style.visibility = 'hidden';
+                            b.$endpoint_end.classList.add('endpoint-active');
                         }
                     });
                 } else {
                     to_bar = this.get_bar(bar_wrapper.getAttribute('data-id'));
                     
-                    if (from_bar != to_bar) {
+                    if (from_bar != to_bar && to_bar.$endpoint_end.classList.contains('endpoint-active')) {
                         to_bar.task.dependencies.push(from_bar.task.id);
                     
                         const arrow = new Arrow(
@@ -2256,7 +2250,7 @@ var Gantt = (function () {
 
         reset_endpoints() {
             this.bars.forEach((b) => {
-                b.$endpoint_end.style.fill = null;
+                b.$endpoint_end.classList.remove('endpoint-active');
                 if (!b.$endpoint_end.is_used) {
                     b.$endpoint_end.style.opacity = null;
                 }

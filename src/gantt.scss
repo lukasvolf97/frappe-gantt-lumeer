@@ -94,6 +94,12 @@ $handle-color: #ddd !default;
 		transition: opacity .3s ease;
 	}
 
+	.endpoint-active {
+		fill: green;
+		opacity: 1;
+		transition: opacity .3s ease;
+	}
+
 	.bar-wrapper {
 		cursor: pointer;
 		outline: none;

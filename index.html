@@ -64,7 +64,7 @@
 				id: "Task 2",
 				text_color: "black",
 				swimlane: "First steps",
-				sub_swimlane: "2. item",
+				sub_swimlane: "3. item",
 				secondary_color: 'green',
 				progress: 10,
 				dependencies: 'Task 1'
@@ -75,7 +75,7 @@
 				name: 'Review',
 				id: "Task 3",
 				text_color: "red",
-				swimlane: "Next steps",
+				//swimlane: "Next steps",
 				sub_swimlane: "1. item",
 				progress: 5,
 				dependencies: 'Task 2'
@@ -125,7 +125,7 @@
 			on_view_change: function(mode) {
 				console.log(mode);
 			},
-		/*	custom_popup_html : function (task) {
+	custom_popup_html : function (task) {
 				return `
             	<div class="title">` + task.name + `</div>
 				<div class="subtitle"> Progress: ` + task.progress + `</div>	
@@ -139,7 +139,7 @@
 						</svg> 
 					</div>
 					`: '');
-			},*/
+			},
 			view_mode: 'Day',
 			language: 'en'
 		});

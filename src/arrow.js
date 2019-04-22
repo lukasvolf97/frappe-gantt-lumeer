@@ -33,7 +33,7 @@ export default class Arrow {
             this.gantt.options.padding;
 
         const from_is_below_to =
-            this.from_task.task._index > this.to_task.task._index;
+            this.from_task.task._index >= this.to_task.task._index;
         const curve = this.gantt.options.arrow_curve;
         const clockwise = from_is_below_to ? 1 : 0;
         const curve_y = from_is_below_to ? -curve : curve;
@@ -50,29 +50,17 @@ export default class Arrow {
         const left = this.to_task.$bar.getX() - this.gantt.options.padding;
 
         if (this.endpoint.getAttribute('class').includes('start')) {
-            if (this.to_task.$bar.getX() > this.from_task.$bar.getX()) {
-                this.path = `
-                M ${start_x} ${start_y}
-                h ${-curve * 2}
-                a ${curve} ${curve} 0 0 ${clockwise} -${curve} ${curve_y}
-                V ${down_2}
-                a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
-                L ${end_x} ${end_y}
-                m -5 -5
-                l 5 5
-                l -5 5`;
-            } else {
-                this.path = `
-                M ${start_x} ${start_y}
-                H ${left}
-                a ${curve} ${curve} 0 0 ${clockwise} -${curve} ${curve_y}
-                V ${down_2}
-                a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
-                L ${end_x} ${end_y}
-                m -5 -5
-                l 5 5
-                l -5 5`;
-            }
+            let h_attr = (this.to_task.$bar.getX() > this.from_task.$bar.getX()) ? `h ${-curve * 2}` : `H ${left}`;
+            this.path = `
+            M ${start_x} ${start_y}
+            ${h_attr}
+            a ${curve} ${curve} 0 0 ${clockwise} -${curve} ${curve_y}
+            V ${down_2}
+            a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
+            L ${end_x} ${end_y}
+            m -5 -5
+            l 5 5
+            l -5 5`;
         } else {
             if (this.to_task.$bar.getX() <= this.from_task.$bar.getEndX()) {
                 this.path = `
@@ -88,14 +76,23 @@ export default class Arrow {
                 l 5 5
                 l -5 5`;
             } else {
-                this.path = `
-                M ${start_x} ${start_y}
-                V ${down_2}
-                a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
-                L ${end_x} ${end_y}
-                m -5 -5
-                l 5 5
-                l -5 5`;
+                if (this.to_task.$bar.getY() !== this.from_task.$bar.getY()) {
+                    this.path = `
+                    M ${start_x} ${start_y}
+                    V ${down_2}
+                    a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
+                    L ${end_x} ${end_y}
+                    m -5 -5
+                    l 5 5
+                    l -5 5`;
+                } else {
+                    this.path = `
+                    M ${start_x} ${start_y}
+                    L ${end_x} ${end_y}
+                    m -5 -5
+                    l 5 5
+                    l -5 5`;
+                }
             }
         }
     }
