@@ -26,6 +26,7 @@ export default class Popup {
         if (!options.position) {
             options.position = 'left';
         }
+        this.options = options;
         const target_element = options.target_element;
 
         if (this.custom_html) {
@@ -35,9 +36,24 @@ export default class Popup {
             this.pointer = this.parent.querySelector('.pointer');
         } else {
             // set data
-            this.title.innerHTML = options.title;
-            this.subtitle.innerHTML = options.subtitle;
-            this.parent.style.width = this.parent.clientWidth + 'px';
+            if (typeof options.task.to_show_in_popup === 'string') {
+                this.parent.innerHTML = '<div class="title">'+ options.title +'</div>';
+                let to_show = options.task.to_show_in_popup.split(',');
+                to_show.forEach((item_with_class) => {
+                    let class_item = item_with_class.split(':');
+                    this.parent.innerHTML += `
+                    <div class="` + (class_item[0].length == 0 ? 'subtitle' : class_item[0]) + '">'
+                        + (class_item[1].length == 0 ? '' : class_item[1] + ': ') + options.task[class_item[2]] +
+                        '</div>';
+                });
+                this.parent.innerHTML += '<div class="pointer"></div>';
+                this.pointer = this.parent.querySelector('.pointer');
+            } else {
+                this.make();
+                this.title.innerHTML = options.title;
+                this.subtitle.innerHTML = options.subtitle;
+                this.parent.style.width = this.parent.clientWidth + 'px';
+            }
         }
 
         // set position
@@ -59,10 +75,10 @@ export default class Popup {
         }
 
         // show
-        this.parent.style.opacity = 1;
+        this.parent.style.visibility = 'visible';
     }
 
     hide() {
-        this.parent.style.opacity = 0;
+        this.parent.style.visibility = 'hidden';
     }
 }

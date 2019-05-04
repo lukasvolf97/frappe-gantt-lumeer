@@ -36,14 +36,22 @@ export default class Bar {
                 (this.task.progress / 100) || 0;
         this.group = createSVG('g', {
             class: 'bar-wrapper ' + (this.task.custom_class || ''),
-            'data-id': this.task.id
+            'data-id': this.task.id,
+            id: this.task.id
         });
+        this.inner_bar_group = createSVG('g', {
+            append_to: this.group
+        })
         this.bar_group = createSVG('g', {
             class: 'bar-group',
-            append_to: this.group
+            append_to: this.inner_bar_group
         });
         this.handle_group = createSVG('g', {
             class: 'handle-group',
+            append_to: this.inner_bar_group
+        });
+        this.endpoint_group = createSVG('g', {
+            class: 'endpoint-group',
             append_to: this.group
         });
     }
@@ -71,6 +79,7 @@ export default class Bar {
         this.draw_progress_bar();
         this.draw_label();
         this.draw_resize_handles();
+        this.draw_endpoints();
     }
 
     draw_bar() {
@@ -82,36 +91,56 @@ export default class Bar {
             rx: this.corner_radius,
             ry: this.corner_radius,
             class: 'bar',
+            style: (this.task.primary_color) ? 'fill:' + this.task.primary_color : '',
             append_to: this.bar_group
-        });
+        }); 
 
         animateSVG(this.$bar, 'width', 0, this.width);
 
         if (this.invalid) {
             this.$bar.classList.add('bar-invalid');
         }
+
     }
 
     draw_progress_bar() {
         if (this.invalid) return;
+        let bar_progress_width = this.progress_width;
+        let bar_progress_inner_width = this.progress_width >= this.width ? this.width : this.progress_width;;
+
         this.$bar_progress = createSVG('rect', {
             x: this.x,
             y: this.y,
-            width: this.progress_width,
+            width: bar_progress_width,
             height: this.height,
             rx: this.corner_radius,
             ry: this.corner_radius,
             class: 'bar-progress',
+            style: ((this.task.secondary_color) ? 'fill:' + this.task.secondary_color + '; ': '') + 'opacity: 0.5',
+            append_to: this.bar_group
+        });
+        this.$bar_progress_inner = createSVG('rect', {
+            x: this.x,
+            y: this.y,
+            width: bar_progress_inner_width,
+            height: this.height,
+            rx: this.corner_radius,
+            ry: this.corner_radius,
+            class: 'bar-progress',
+            style: (this.task.secondary_color) ? 'fill:' + this.task.secondary_color + '; ' : '',
             append_to: this.bar_group
         });
 
-        animateSVG(this.$bar_progress, 'width', 0, this.progress_width);
+        animateSVG(this.$bar_progress_inner, 'width', 0, bar_progress_inner_width);
+        animateSVG(this.$bar_progress, 'width', 0, bar_progress_width);
+         
     }
 
     draw_label() {
         createSVG('text', {
             x: this.x + this.width / 2,
             y: this.y + this.height / 2,
+            style: (this.task.text_color) ? 'fill:' + this.task.text_color + '; ' : '',
             innerHTML: this.task.name,
             class: 'bar-label',
             append_to: this.bar_group
@@ -148,13 +177,36 @@ export default class Bar {
             append_to: this.handle_group
         });
 
-        if (this.task.progress && this.task.progress < 100) {
+        if (this.task.progress) {
             this.$handle_progress = createSVG('polygon', {
                 points: this.get_progress_polygon_points().join(','),
                 class: 'handle progress',
                 append_to: this.handle_group
             });
         }
+    }
+
+    draw_endpoints() {
+        if (this.invalid) return;
+
+        const bar = this.$bar;
+        const endpoint_r = 4;
+
+        this.$endpoint_end = createSVG('circle', {
+            cx: bar.getEndX() + endpoint_r * 2,
+            cy: bar.getY() + bar.getHeight() / 2,
+            r: endpoint_r,
+            class: 'endpoint end',
+            append_to: this.endpoint_group
+        });
+
+        this.$endpoint_start = createSVG('circle', {
+            cx: bar.getX() - endpoint_r * 2,
+            cy: bar.getY() + bar.getHeight() / 2,
+            r: endpoint_r,
+            class: 'endpoint start',
+            append_to: this.endpoint_group
+        });
     }
 
     get_progress_polygon_points() {
@@ -175,12 +227,11 @@ export default class Bar {
     }
 
     setup_click_event() {
-        $.on(this.group, 'focus ' + this.gantt.options.popup_trigger, e => {
+        $.on(this.inner_bar_group, 'focus ' + this.gantt.options.popup_trigger, e => {
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
             }
-
             if (e.type === 'click') {
                 this.gantt.trigger_event('click', [this.task]);
             }
@@ -232,8 +283,13 @@ export default class Bar {
         }
         this.update_label_position();
         this.update_handle_position();
-        this.update_progressbar_position();
+
+        let new_width = this.$bar.getWidth() * (this.task.progress / 100);
+        this.update_progressbar_position(this.$bar_progress, new_width);
+        this.update_progressbar_position(this.$bar_progress_inner, new_width > this.$bar.getWidth() ? this.$bar.getWidth() : new_width);
+
         this.update_arrow_position();
+        this.update_endpoints_position();
     }
 
     date_changed() {
@@ -249,6 +305,7 @@ export default class Bar {
             changed = true;
             this.task._end = new_end_date;
         }
+
 
         if (!changed) return;
 
@@ -267,7 +324,12 @@ export default class Bar {
 
     set_action_completed() {
         this.action_completed = true;
-        setTimeout(() => (this.action_completed = false), 1000);
+        if (this.timer == undefined) {
+            this.timer = setTimeout(() => {
+                this.action_completed = false;
+                this.timer = undefined;
+            }, 1000);
+        }
     }
 
     compute_start_end_date() {
@@ -358,12 +420,9 @@ export default class Bar {
         return element;
     }
 
-    update_progressbar_position() {
-        this.$bar_progress.setAttribute('x', this.$bar.getX());
-        this.$bar_progress.setAttribute(
-            'width',
-            this.$bar.getWidth() * (this.task.progress / 100)
-        );
+    update_progressbar_position(bar_progress, width) {
+        bar_progress.setAttribute('x', this.$bar.getX());
+        bar_progress.setAttribute('width',width);
     }
 
     update_label_position() {
@@ -398,6 +457,17 @@ export default class Bar {
             arrow.update();
         }
     }
+
+    update_endpoints_position() {
+        const bar = this.$bar;
+        this.endpoint_group
+            .querySelector('.endpoint.start')
+            .setAttribute('cx', bar.getX() - 8);
+        this.endpoint_group
+            .querySelector('.endpoint.end')
+            .setAttribute('cx', bar.getEndX() + 8);
+    }
+
 }
 
 function isFunction(functionToCheck) {

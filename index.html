@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<title>Simple Gantt</title>
@@ -8,10 +9,12 @@
 			font-family: sans-serif;
 			background: #ccc;
 		}
+
 		.container {
 			width: 80%;
 			margin: 0 auto;
 		}
+
 		/* custom class */
 		.gantt .bar-milestone .bar {
 			fill: tomato;
@@ -20,11 +23,17 @@
 	<link rel="stylesheet" href="dist/frappe-gantt.css" />
 	<script src="dist/frappe-gantt.js"></script>
 </head>
+
 <body>
 	<div class="container">
 		<h2>Interactive Gantt Chart entirely made in SVG!</h2>
 		<div class="gantt-target"></div>
 	</div>
+	<button type="button" onclick='gantt_chart.change_view_mode("Day")'>Day</button>
+	<button type="button" onclick='gantt_chart.change_view_mode("Month")'>Month</button>
+	<button type="button" onclick='gantt_chart.change_view_mode("Year")'>Year</button>
+	<button type="button" onclick='gantt_chart.refresh([])'>Empty Tasks</button>
+	<button type="button" onclick='gantt_chart.refresh(tasks)'>Fill with Tasks</button>
 	<script>
 		var tasks = [
 			{
@@ -32,7 +41,14 @@
 				end: '2018-10-08',
 				name: 'Redesign website',
 				id: "Task 0",
-				progress: 20
+				swimlane: "First steps",
+				sub_swimlane: "1. item",
+				primary_color: 'black',
+				start_drag: false,
+				progress: 120,
+				dependencies: 'Task 1',
+				//custom class:custom text:name of task property to show
+				to_show_in_popup: "new-progress:My Custom Progress Text:progress, new-dependencies::dependencies, new-drag:Is it allowed to change start date?:start_drag"
 			},
 			{
 				start: '2018-10-03',
@@ -40,13 +56,20 @@
 				name: 'Write new content',
 				id: "Task 1",
 				progress: 5,
-				dependencies: 'Task 0'
+				swimlane: "Second step",
+				sub_swimlane: "3. item",
+				//sub_swimlane: "1. item",
+				end_drag: false,
 			},
 			{
 				start: '2018-10-04',
 				end: '2018-10-08',
 				name: 'Apply new styles',
 				id: "Task 2",
+				text_color: "black",
+				swimlane: "First steps",
+				sub_swimlane: "3. item",
+				secondary_color: 'green',
 				progress: 10,
 				dependencies: 'Task 1'
 			},
@@ -55,6 +78,9 @@
 				end: '2018-10-09',
 				name: 'Review',
 				id: "Task 3",
+				text_color: "red",
+				//swimlane: "Next steps",
+				sub_swimlane: "1. item",
 				progress: 5,
 				dependencies: 'Task 2'
 			},
@@ -64,7 +90,8 @@
 				name: 'Deploy',
 				id: "Task 4",
 				progress: 0,
-				dependencies: 'Task 2'
+				dependencies: 'Task 2',
+				swimlane: "Other steps"
 			},
 			{
 				start: '2018-10-11',
@@ -73,33 +100,56 @@
 				id: "Task 5",
 				progress: 0,
 				dependencies: 'Task 4',
-				custom_class: 'bar-milestone'
-			},
+				custom_class: 'bar-milestone',
+				swimlane: "Other steps",
+			}/*,
 			{
 				start: '2014-01-05',
 				end: '2019-10-12',
 				name: 'Long term task',
+				editable: false,
 				id: "Task 6",
 				progress: 0
-			}
+			}*/
 		]
+
 		var gantt_chart = new Gantt(".gantt-target", tasks, {
 			on_click: function (task) {
 				console.log(task);
 			},
-			on_date_change: function(task, start, end) {
+			on_dependency_added: function (dependency) {
+				console.log(dependency);
+			},
+			on_date_change: function (task, start, end) {
 				console.log(task, start, end);
 			},
-			on_progress_change: function(task, progress) {
+			on_progress_change: function (task, progress) {
 				console.log(task, progress);
 			},
-			on_view_change: function(mode) {
+			on_view_change: function (mode) {
 				console.log(mode);
 			},
-			view_mode: 'Month',
+			custom_popup_html: function (task) {
+				return `
+            	<div class="title">` + task.name + `</div>
+				<div class="subtitle"> Progress: ` + task.progress + `</div>	
+				<div class="subtitle"> Can u change the start date?
+					` + ((task.start_drag === undefined || task.start_drag === true) ? 'Yes' : 'No') + `
+				</div> `
+					+ (task.secondary_color ? `
+					'<div class="subtitle"> Custom secondary color set to:
+						<svg height = "10" width = "10"> 
+							<rect x="0" y="0" height = "10" width = "10" rx = "3" ry = "3" style = "fill: `+ task.secondary_color + `" ></rect>
+						</svg> 
+					</div>
+					`: '');
+			},
+			view_mode: 'Day',
 			language: 'en'
 		});
+
 		console.log(gantt_chart);
 	</script>
 </body>
+
 </html>

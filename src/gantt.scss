@@ -41,6 +41,7 @@ $handle-color: #ddd !default;
 	}
 
 	.arrow {
+		cursor: pointer;
 		fill: none;
 		stroke: $text-muted;
 		stroke-width: 1.4;
@@ -87,6 +88,18 @@ $handle-color: #ddd !default;
 		transition: opacity .3s ease;
 	}
 
+	.endpoint {
+		fill: $handle-color;
+		opacity: 0;
+		transition: opacity .3s ease;
+	}
+
+	.endpoint-active {
+		fill: green;
+		opacity: 1;
+		transition: opacity .3s ease;
+	}
+
 	.bar-wrapper {
 		cursor: pointer;
 		outline: none;
@@ -103,6 +116,16 @@ $handle-color: #ddd !default;
 			.handle {
 				visibility: visible;
 				opacity: 1;
+			}
+
+			.endpoint.end {
+				cursor: copy;
+				stroke: cyan;
+				stroke-width: 1px;
+				opacity: 1;
+			}
+			.endpoint.start {
+				cursor: default;
 			}
 		}
 
@@ -133,6 +156,58 @@ $handle-color: #ddd !default;
 	}
 }
 
+.gantt-swimlanes-container {
+	position: relative;
+	overflow: auto;
+	font-size: 12px;
+
+	.gantt-swimlanes {
+
+		.swimlanes-header {
+			fill: #ffffff;
+			stroke: $border-color;
+			stroke-width: 1.4;
+		}
+
+		.swimlanes-background {
+			fill: #ffffff;
+			stroke: $border-color;
+			stroke-width: 1.4;
+		}
+
+		.separ {
+			stroke: $light-border-color;
+		}
+
+		.swimlane {
+			.swimlane-label {
+				padding: 10px;
+				fill: black;
+			}
+			.swimlane-row {
+				fill: #ffffff;
+				stroke: $border-color;
+				stroke-width: 1.4;
+			}
+
+		.sub-swimlane {	
+		
+			.sub-swimlane-label {
+				padding: 10px;
+				fill: black;
+				}
+
+			.sub-swimlane-row{
+				padding: 10px;
+				fill: #ffffff;
+				stroke: $border-color;
+				stroke-width: 1.4;
+				}
+			}
+		}
+	}
+}
+
 .gantt-container {
 	position: relative;
 	overflow: auto;
@@ -156,6 +231,21 @@ $handle-color: #ddd !default;
 			padding: 10px;
 			color: #dfe2e5;
 		}
+
+
+		.new-progress {
+			padding: 10px;
+			color: red;
+		}
+		.new-dependencies {
+			padding: 10px;
+			color: red;
+		}
+		.new-drag {
+			padding: 10px;
+			color: red;
+		}
+
 
 		.pointer {
 			position: absolute;
