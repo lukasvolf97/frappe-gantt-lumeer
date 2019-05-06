@@ -32,8 +32,8 @@ export default class Bar {
         this.width = this.gantt.options.column_width * this.duration;
         this.progress_width =
             this.gantt.options.column_width *
-                this.duration *
-                (this.task.progress / 100) || 0;
+            this.duration *
+            (this.task.progress / 100) || 0;
         this.group = createSVG('g', {
             class: 'bar-wrapper ' + (this.task.custom_class || ''),
             'data-id': this.task.id,
@@ -57,19 +57,19 @@ export default class Bar {
     }
 
     prepare_helpers() {
-        SVGElement.prototype.getX = function() {
+        SVGElement.prototype.getX = function () {
             return +this.getAttribute('x');
         };
-        SVGElement.prototype.getY = function() {
+        SVGElement.prototype.getY = function () {
             return +this.getAttribute('y');
         };
-        SVGElement.prototype.getWidth = function() {
+        SVGElement.prototype.getWidth = function () {
             return +this.getAttribute('width');
         };
-        SVGElement.prototype.getHeight = function() {
+        SVGElement.prototype.getHeight = function () {
             return +this.getAttribute('height');
         };
-        SVGElement.prototype.getEndX = function() {
+        SVGElement.prototype.getEndX = function () {
             return this.getX() + this.getWidth();
         };
     }
@@ -93,7 +93,7 @@ export default class Bar {
             class: 'bar',
             style: (this.task.primary_color) ? 'fill:' + this.task.primary_color : '',
             append_to: this.bar_group
-        }); 
+        });
 
         animateSVG(this.$bar, 'width', 0, this.width);
 
@@ -116,7 +116,7 @@ export default class Bar {
             rx: this.corner_radius,
             ry: this.corner_radius,
             class: 'bar-progress',
-            style: ((this.task.secondary_color) ? 'fill:' + this.task.secondary_color + '; ': '') + 'opacity: 0.5',
+            style: ((this.task.secondary_color) ? 'fill:' + this.task.secondary_color + '; ' : '') + 'opacity: 0.5',
             append_to: this.bar_group
         });
         this.$bar_progress_inner = createSVG('rect', {
@@ -133,7 +133,7 @@ export default class Bar {
 
         animateSVG(this.$bar_progress_inner, 'width', 0, bar_progress_inner_width);
         animateSVG(this.$bar_progress, 'width', 0, bar_progress_width);
-         
+
     }
 
     draw_label() {
@@ -141,7 +141,7 @@ export default class Bar {
             x: this.x + this.width / 2,
             y: this.y + this.height / 2,
             style: (this.task.text_color) ? 'fill:' + this.task.text_color + '; ' : '',
-            innerHTML: this.task.name,
+            innerHTML: new Option(this.task.name).innerHTML,
             class: 'bar-label',
             append_to: this.bar_group
         });
@@ -177,7 +177,7 @@ export default class Bar {
             append_to: this.handle_group
         });
 
-        if (this.task.progress) {
+        if (this.task.progress !== undefined) {
             this.$handle_progress = createSVG('polygon', {
                 points: this.get_progress_polygon_points().join(','),
                 class: 'handle progress',
@@ -246,10 +246,11 @@ export default class Bar {
     show_popup() {
         if (this.gantt.bar_being_dragged) return;
 
-        const start_date = date_utils.format(this.task._start, 'MMM D');
+        const start_date = date_utils.format(this.task._start, '', this.gantt.options.language);
         const end_date = date_utils.format(
             date_utils.add(this.task._end, -1, 'second'),
-            'MMM D'
+            '',
+            this.gantt.options.language
         );
         const subtitle = start_date + ' - ' + end_date;
 
@@ -324,7 +325,7 @@ export default class Bar {
 
     set_action_completed() {
         this.action_completed = true;
-        if (this.timer == undefined) {
+        if (!this.timer) {
             this.timer = setTimeout(() => {
                 this.action_completed = false;
                 this.timer = undefined;
@@ -422,7 +423,7 @@ export default class Bar {
 
     update_progressbar_position(bar_progress, width) {
         bar_progress.setAttribute('x', this.$bar.getX());
-        bar_progress.setAttribute('width',width);
+        bar_progress.setAttribute('width', width);
     }
 
     update_label_position() {
@@ -431,7 +432,7 @@ export default class Bar {
 
         if (label.getBBox().width > bar.getWidth()) {
             label.classList.add('big');
-            label.setAttribute('x', bar.getX() + bar.getWidth() + 5);
+            label.setAttribute('x', bar.getX() + bar.getWidth() + 15);
         } else {
             label.classList.remove('big');
             label.setAttribute('x', bar.getX() + bar.getWidth() / 2);

@@ -33,11 +33,51 @@ var tasks = [
   {
     id: 'Task 1',
     name: 'Redesign website',
-    start: '2016-12-28',
-    end: '2016-12-31',
+    start: '2019-12-28',
+    end: '2019-12-31',
     progress: 20,
     dependencies: 'Task 2, Task 3',
-    custom_class: 'bar-milestone' // optional
+    custom_class: 'bar-milestone', // optional
+    swimlane: 'Steps',
+    sub_swimlane: '1. Step',
+    start_drag: false, //cannot change start date
+    end_drag: true, //cannot change end date
+	to_show_in_popup: "new-progress:My Custom Progress Text:progress" //custom class:custom text:name of task property to show
+  },
+  {
+    id: 'Task 2',
+    name: 'Write new content',
+	start: '2019-10-03',
+	end: '2019-10-06',
+    progress: 20,
+    dependencies: 'Task 3',
+    editable: false, //cannot change any value (interactively)
+    swimlane: 'Steps',
+    sub_swimlane: '2. Step',
+  },
+  {
+    id: 'Task 3',
+    name: 'Deploy',
+	start: '2019-10-04',
+	end: '2019-10-06',
+    progress: 5,
+    dependencies: 'Task 4',
+    primary_color: 'green',
+    text_color: '#3399ff',
+    swimlane: 'Final Stage',
+  },
+  {
+    id: 'Task 4',
+    name: 'Go Live',
+	start: '2019-10-11',
+	end: '2019-10-11',
+    progress: 0,
+    secondary_color: 'rgb(255, 51, 204)',
+  },
+  {
+    name: 'Minimum',
+	start: '2019-10-12',
+	end: '2019-10-12',
   },
   ...
 ]

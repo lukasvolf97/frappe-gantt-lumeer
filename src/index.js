@@ -131,10 +131,9 @@ export default class Gantt {
                 task.end = null;
             }
 
-
             // cache index
-            task._index = (task.swimlane === undefined ? this.swimlanes_map[task.id] :
-                (task.sub_swimlane !== undefined ? this.swimlanes_map[task.swimlane][task.sub_swimlane] :
+            task._index = (!task.swimlane ? this.swimlanes_map[task.id] :
+                (task.sub_swimlane ? this.swimlanes_map[task.swimlane][task.sub_swimlane] :
                     this.swimlanes_map[task.swimlane]['undefined' + task.id]));
 
             if (!this.indexed_tasks.includes(task._index)) this.indexed_tasks.push(task._index);
@@ -221,15 +220,18 @@ export default class Gantt {
     }
 
     setup_swimlanes(tasks) {
+        tasks.map((task) => task.used = false);
+
         this.swimlanes_map = {};
         let index = 0;
         tasks.map((task) => {
-            if (task.swimlane !== undefined && task.used !== true) {
+            if (task.swimlane && task.used !== true) {
+                this.contains_swimlanes = true;
                 tasks.map((other_task) => {
                     if (task.swimlane === other_task.swimlane) {
                         this.swimlanes_map[other_task.swimlane] = this.swimlanes_map[other_task.swimlane] || {};
                         if (isNaN(this.swimlanes_map[other_task.swimlane][other_task.sub_swimlane])) {
-                            if (other_task.sub_swimlane === undefined) {
+                            if (!other_task.sub_swimlane) {
                                 this.swimlanes_map[other_task.swimlane]['undefined' + other_task.id] = index;
                             } else {
                                 this.swimlanes_map[other_task.swimlane][other_task.sub_swimlane] = index;
@@ -241,9 +243,9 @@ export default class Gantt {
                 })
             }
         });
-        //sent tasks with undefined swimlanes to the end of table
+        //sent tasks with undefined swimlanes to the end of the table
         tasks.map((task) => {
-            if (task.swimlane === undefined) {
+            if (!task.swimlane) {
                 let swimlane_name = new String(task.id);
                 swimlane_name.invalid = true;
                 this.swimlanes_map[swimlane_name] = {};
@@ -312,7 +314,7 @@ export default class Gantt {
 
         if (this.tasks.length == 0) {
             this.gantt_start = date_utils.now();
-            this.gantt_end = date_utils.add(this.gantt_start, 2, "year");
+            this.gantt_end = date_utils.add(this.gantt_start, 1, "year");
         } else {
             this.gantt_start = date_utils.start_of(this.gantt_start, 'day');
             this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
@@ -652,7 +654,7 @@ export default class Gantt {
     }
 
     make_swimlanes() {
-        if (this.tasks.length == 0) {
+        if (this.tasks.length == 0 || !this.contains_swimlanes) {
             return;
         }
 
@@ -765,7 +767,11 @@ export default class Gantt {
         const parent_element = this.$svg.parentElement;
         if (!parent_element) return;
 
-        const hours_before_first_task = this.tasks.length == 0 ? this.gantt_start : date_utils.diff(
+        const hours_before_first_task = this.tasks.length == 0 ? date_utils.diff(
+            date_utils.add(this.gantt_start, 30, 'day'),
+            this.gantt_start,
+            'hour'
+        ) : date_utils.diff(
             this.get_oldest_starting_date(),
             this.gantt_start,
             'hour'
@@ -1007,7 +1013,10 @@ export default class Gantt {
                     this.arrows.push(arrow);
                     from_bar.arrows.push(arrow);
                     to_bar.arrows.push(arrow);
-                    this.trigger_event('dependency_added', [from_bar.task.id]);
+                    this.trigger_event('dependency_added', [{
+                        from: from_bar.task.id,
+                        to: to_bar.task.id
+                    }]);
                 }
 
                 [from_bar, to_bar] = this.reset_endpoints();
