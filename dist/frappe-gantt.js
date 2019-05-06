@@ -2045,11 +2045,15 @@ var Gantt = (function () {
                 'hour'
             );
 
+            let number_of_columns = (this.view_is('Day') ? 8 : //number of columns to show before first task
+                (this.view_is('Month') ? 4 : 6));
+
             const scroll_pos =
                 hours_before_first_task /
                 this.options.step *
                 this.options.column_width -
-                this.options.column_width;
+                this.options.column_width *
+                number_of_columns;
 
             parent_element.scrollLeft = scroll_pos;
         }
