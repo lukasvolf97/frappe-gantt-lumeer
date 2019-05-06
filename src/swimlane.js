@@ -118,13 +118,13 @@ export default class Swimlane {
         let max = 0;
         let longest_title;
         gantt.tasks.forEach((task) => {
-            if (is_title && task.swimlane !== undefined) {
+            if (is_title && task.swimlane) {
                 if (task.swimlane.length > max) {
                     max = task.swimlane.length;
                     longest_title = task.swimlane;
                 }
             }
-            if (!is_title && task.sub_swimlane !== undefined) {
+            if (!is_title && task.sub_swimlane) {
                 if (task.sub_swimlane.length > max) {
                     max = task.sub_swimlane.length;
                     longest_title = task.sub_swimlane;
