@@ -12,8 +12,9 @@ export default class Arrow {
 
     calculate_path() {
 
-        if (this.endpoint === undefined) {
-            this.endpoint = (this.from_task.$bar.getX() <= this.to_task.$bar.getX()) ? this.from_task.$endpoint_end :
+        if (!this.endpoint) {
+            this.endpoint = (this.from_task.$bar.getX() <= this.to_task.$bar.getX()) ?
+                this.from_task.$endpoint_end :
                 this.from_task.$endpoint_start;
             this.endpoint.style.opacity = 1;
             this.endpoint.is_used = true;
@@ -50,7 +51,10 @@ export default class Arrow {
         const left = this.to_task.$bar.getX() - this.gantt.options.padding;
 
         if (this.endpoint.getAttribute('class').includes('start')) {
-            let h_attr = (this.to_task.$bar.getX() > this.from_task.$bar.getX()) ? `h ${-curve * 2}` : `H ${left}`;
+            let h_attr = (this.to_task.$endpoint_start.getAttribute('cx') > this.from_task.$endpoint_end.getAttribute('cx')) ?
+                `h ${-curve * 2}` :
+                `H ${left}`;
+
             this.path = `
             M ${start_x} ${start_y}
             ${h_attr}
@@ -62,7 +66,7 @@ export default class Arrow {
             l 5 5
             l -5 5`;
         } else {
-            if (this.to_task.$bar.getX() <= this.from_task.$bar.getEndX()) {
+            if (this.to_task.$endpoint_start.getAttribute('cx') <= this.from_task.$endpoint_end.getAttribute('cx')) {
                 this.path = `
                 M ${start_x} ${start_y}
                 v ${down_1}
@@ -101,7 +105,10 @@ export default class Arrow {
         $.on(this.element, 'click', e => {
 
             if (e.type === 'click') {
-                this.gantt.trigger_event('dependency_deleted', [this.element]);
+                this.gantt.trigger_event('dependency_deleted', [{
+                    from: this.from_task.task.id,
+                    to: this.to_task.task.id
+                }]);
             }
 
             this.element.parentNode.removeChild(this.element);

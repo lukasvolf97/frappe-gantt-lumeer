@@ -37,18 +37,18 @@
 	<script>
 		var tasks = [
 			{
-				start: '2018-10-01',
+				start: new Date([2018, 10, 1]),
 				end: '2018-10-08',
-				name: 'Redesign website',
+				name: '<span>Some text</span>',
 				id: "Task 0",
 				swimlane: "First steps",
 				sub_swimlane: "1. item",
-				primary_color: 'black',
+				primary_color: 'rgb(255, 51, 204)',
 				start_drag: false,
 				progress: 120,
 				dependencies: 'Task 1',
 				//custom class:custom text:name of task property to show
-				to_show_in_popup: "new-progress:My Custom Progress Text:progress, new-dependencies::dependencies, new-drag:Is it allowed to change start date?:start_drag"
+				//to_show_in_popup: "new-progress:My Custom Progress Text:progress, new-dependencies::dependencies, new-drag:Is it allowed to change start date?:start_drag"
 			},
 			{
 				start: '2018-10-03',
@@ -58,7 +58,6 @@
 				progress: 5,
 				swimlane: "Second step",
 				sub_swimlane: "3. item",
-				//sub_swimlane: "1. item",
 				end_drag: false,
 			},
 			{
@@ -78,8 +77,8 @@
 				end: '2018-10-09',
 				name: 'Review',
 				id: "Task 3",
-				text_color: "red",
-				//swimlane: "Next steps",
+				text_color: "#3399ff",
+				swimlane: "Next steps",
 				sub_swimlane: "1. item",
 				progress: 5,
 				dependencies: 'Task 2'
@@ -117,8 +116,11 @@
 			on_click: function (task) {
 				console.log(task);
 			},
-			on_dependency_added: function (dependency) {
-				console.log(dependency);
+			on_dependency_added: function (connection) {
+				console.log(connection);
+			},
+			on_dependency_deleted: function (connection) {
+				console.log(connection);
 			},
 			on_date_change: function (task, start, end) {
 				console.log(task, start, end);
@@ -129,7 +131,7 @@
 			on_view_change: function (mode) {
 				console.log(mode);
 			},
-			custom_popup_html: function (task) {
+			/*custom_popup_html: function (task) {
 				return `
             	<div class="title">` + task.name + `</div>
 				<div class="subtitle"> Progress: ` + task.progress + `</div>	
@@ -143,8 +145,8 @@
 						</svg> 
 					</div>
 					`: '');
-			},
-			view_mode: 'Day',
+			},*/
+			view_mode: 'Quarter Day',
 			language: 'en'
 		});
 
