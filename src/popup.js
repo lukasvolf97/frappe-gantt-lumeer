@@ -42,8 +42,8 @@ export default class Popup {
                 to_show.forEach((item_with_class) => {
                     let class_item = item_with_class.split(':');
                     this.parent.innerHTML += `
-                    <div class="` + (class_item[0].length == 0 ? 'subtitle' : class_item[0]) + '">'
-                        + (class_item[1].length == 0 ? '' : class_item[1] + ': ') + options.task[class_item[2]] +
+                    <div class="` + (class_item[0].length === 0 ? 'subtitle' : class_item[0]) + '">'
+                        + (class_item[1].length === 0 ? '' : class_item[1] + ': ') + options.task[class_item[2]] +
                         '</div>';
                 });
                 this.parent.innerHTML += '<div class="pointer"></div>';

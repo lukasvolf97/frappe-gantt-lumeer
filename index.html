@@ -39,12 +39,14 @@
 			{
 				start: new Date([2018, 10, 1]),
 				end: '2018-10-08',
-				name: '<span>Some text</span>',
+				name: 'Some text',
 				id: "Task 0",
 				swimlane: "First steps",
 				sub_swimlane: "1. item",
 				primary_color: 'rgb(255, 51, 204)',
 				start_drag: false,
+				end_drag: false,
+				editable: true,
 				progress: 120,
 				dependencies: 'Task 1',
 				//custom class:custom text:name of task property to show
@@ -58,6 +60,7 @@
 				progress: 5,
 				swimlane: "Second step",
 				sub_swimlane: "3. item",
+				editable: true,
 				end_drag: false,
 			},
 			{
@@ -84,21 +87,25 @@
 				dependencies: 'Task 2'
 			},
 			{
-				start: '2018-10-08',
-				end: '2018-10-10',
+				start: new Date([2019, 1, 8]),
+				end: new Date([2019, 1, 10]),
 				name: 'Deploy',
 				id: "Task 4",
 				progress: 0,
+				editable: true,
+				start_drag: true,
+				end_drag: true,
 				dependencies: 'Task 2',
 				swimlane: "Other steps"
 			},
 			{
-				start: '2018-10-11',
-				end: '2018-10-11',
+				start: '2019-01-11',
+				end: '2019-01-11',
 				name: 'Go Live!',
 				id: "Task 5",
 				progress: 0,
 				dependencies: 'Task 4',
+				editable: true,
 				custom_class: 'bar-milestone',
 				swimlane: "Other steps",
 			}/*,
@@ -110,7 +117,7 @@
 				id: "Task 6",
 				progress: 0
 			}*/
-		]
+		];
 
 		var gantt_chart = new Gantt(".gantt-target", tasks, {
 			on_click: function (task) {
@@ -146,7 +153,7 @@
 					</div>
 					`: '');
 			},*/
-			view_mode: 'Quarter Day',
+			view_mode: 'Day',
 			language: 'en'
 		});
 

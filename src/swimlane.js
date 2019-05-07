@@ -58,9 +58,9 @@ export default class Swimlane {
         this.from_row = Number.MAX_SAFE_INTEGER;
         this.to_row = 0;
 
-        for (var sub_swimlane in this.swimlanes_map[this.swimlane]) {
+        for (let sub_swimlane in this.swimlanes_map[this.swimlane]) {
 
-            let row_index = this.swimlanes_map[this.swimlane][sub_swimlane]
+            let row_index = this.swimlanes_map[this.swimlane][sub_swimlane];
 
             this.from_row = row_index < this.from_row ? row_index : this.from_row;
             this.to_row = row_index > this.to_row ? row_index : this.to_row;

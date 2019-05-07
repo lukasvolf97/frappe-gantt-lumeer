@@ -1,5 +1,5 @@
 import date_utils from './date_utils';
-import { $, createSVG } from './svg_utils';
+import {$, createSVG} from './svg_utils';
 import Bar from './bar';
 import Arrow from './arrow';
 import Popup from './popup';
@@ -54,7 +54,6 @@ export default class Gantt {
 
         // swimlane wrapper
         this.$swimlanes_container = document.createElement('div');
-        this.$swimlanes_container.style.cssFloat = 'left';
         this.$swimlanes_container.classList.add('gantt-swimlanes-container');
 
         // wrapper element
@@ -69,7 +68,7 @@ export default class Gantt {
         this.$svg_swimlanes = createSVG('svg', {
             append_to: this.$swimlanes_container,
             class: 'gantt-swimlanes'
-        })
+        });
         this.$swimlanes_container.appendChild(this.$svg_swimlanes);
 
         // popup wrapper
@@ -111,7 +110,7 @@ export default class Gantt {
         this.row_width = this.dates.length * this.options.column_width;
 
         this.table_height = this.options.header_height + this.options.padding / 2 +
-            (this.row_height) * (this.tasks.length == 0 ? 5 : this.indexed_tasks.length + 1);
+            (this.row_height) * (this.tasks.length === 0 ? 5 : this.indexed_tasks.length + 1);
 
         this.table_width = this.dates.length * this.options.column_width;
 
@@ -119,7 +118,7 @@ export default class Gantt {
     }
 
     setup_tasks(tasks) {
-        this.indexed_tasks = []
+        this.indexed_tasks = [];
         // prepare tasks
         this.tasks = tasks.map((task, i) => {
             // convert to Date objects
@@ -237,7 +236,7 @@ export default class Gantt {
                             } else {
                                 this.swimlanes_map[other_task.swimlane][other_task.sub_swimlane] = index;
                             }
-                            index += 1
+                            index += 1;
                             other_task.used = true;
                         }
                     }
@@ -250,7 +249,7 @@ export default class Gantt {
                 let swimlane_name = new String(task.id);
                 swimlane_name.invalid = true;
                 this.swimlanes_map[swimlane_name] = {};
-                this.swimlanes_map[swimlane_name] = index
+                this.swimlanes_map[swimlane_name] = index;
                 index += 1
             }
         });
@@ -313,9 +312,9 @@ export default class Gantt {
             }
         }
 
-        if (this.tasks.length == 0) {
+        if (this.tasks.length === 0) {
             this.gantt_start = date_utils.now();
-            this.gantt_end = date_utils.add(this.gantt_start, 1, "year");
+            this.gantt_end = date_utils.add(this.gantt_start, 1, 'year');
         } else {
             this.gantt_start = date_utils.start_of(this.gantt_start, 'day');
             this.gantt_end = date_utils.start_of(this.gantt_end, 'day');
@@ -326,7 +325,7 @@ export default class Gantt {
             this.gantt_start = date_utils.add(this.gantt_start, -7, 'day');
             this.gantt_end = date_utils.add(this.gantt_end, 7, 'day');
         } else if (this.view_is('Month')) {
-            this.gantt_start = date_utils.start_of(this.gantt_start, 'year');
+            this.gantt_start = date_utils.add(this.gantt_start, -1, 'year');
             this.gantt_end = date_utils.add(this.gantt_end, 1, 'year');
         } else if (this.view_is('Year')) {
             this.gantt_start = date_utils.add(this.gantt_start, -2, 'year');
@@ -404,7 +403,7 @@ export default class Gantt {
         const grid_width = this.table_width;
         const grid_height = this.table_height;
 
-        this.grid_background = createSVG('rect', {
+        createSVG('rect', {
             x: 0,
             y: 0,
             width: grid_width,
@@ -420,15 +419,15 @@ export default class Gantt {
     }
 
     make_grid_rows() {
-        const rows_layer = createSVG('g', { append_to: this.layers.grid });
-        const lines_layer = createSVG('g', { append_to: this.layers.grid });
+        const rows_layer = createSVG('g', {append_to: this.layers.grid});
+        const lines_layer = createSVG('g', {append_to: this.layers.grid});
 
         const row_width = this.row_width;
         const row_height = this.row_height;
 
         let row_y = this.options.header_height + this.options.padding / 2;
 
-        for (var i = 0; i <= (this.tasks.length == 0 ? 5 : this.indexed_tasks.length); i++) {
+        for (let i = 0; i <= (this.tasks.length === 0 ? 5 : this.indexed_tasks.length); i++) {
             createSVG('rect', {
                 x: 0,
                 y: row_y,
@@ -562,12 +561,11 @@ export default class Gantt {
 
     get_dates_to_draw() {
         let last_date = null;
-        const dates = this.dates.map((date, i) => {
+        return this.dates.map((date, i) => {
             const d = this.get_date_info(date, last_date, i);
             last_date = date;
             return d;
         });
-        return dates;
     }
 
     get_date_info(date, last_date, i) {
@@ -602,8 +600,8 @@ export default class Gantt {
             'Half Day_upper':
                 date.getDate() !== last_date.getDate()
                     ? date.getMonth() !== last_date.getMonth()
-                        ? date_utils.format(date, 'D MMM', this.options.language)
-                        : date_utils.format(date, 'D', this.options.language)
+                    ? date_utils.format(date, 'D MMM', this.options.language)
+                    : date_utils.format(date, 'D', this.options.language)
                     : '',
             Day_upper:
                 date.getMonth() !== last_date.getMonth()
@@ -655,9 +653,12 @@ export default class Gantt {
     }
 
     make_swimlanes() {
-        if (this.tasks.length == 0 || !this.contains_swimlanes) {
+        if (this.tasks.length === 0 || !this.contains_swimlanes) {
+            $.attr(this.$svg_swimlanes, 'display', 'none');
             return;
         }
+
+        $.attr(this.$svg_swimlanes, 'display', 'visible');
 
         this.$svg_swimlanes.longest_title_width = Swimlane.get_longest_title_width(this, true);
         this.$svg_swimlanes.longest_sub_title_width = Swimlane.get_longest_title_width(this, false);
@@ -686,7 +687,7 @@ export default class Gantt {
         });
 
         for (var swimlane in this.swimlanes_map) {
-            if (swimlane.invalid !== true) new Swimlane(this, swimlane);
+            if (!swimlane.invalid) new Swimlane(this, swimlane);
         }
 
         createSVG('line', {
@@ -712,7 +713,7 @@ export default class Gantt {
         this.bars = this.tasks.map(task => {
             const bar = new Bar(this, task);
             if (this.popup && task == this.popup.options.task) this.popups_bar = bar;
-            if (this.popup && this.popup.parent.style.visibility == 'hidden') this.popups_bar = null;
+            if (this.popup && this.popup.parent.style.visibility === 'hidden') this.popups_bar = null;
             this.layers.bar.appendChild(bar.group);
             return bar;
         });
@@ -768,7 +769,7 @@ export default class Gantt {
         const parent_element = this.$svg.parentElement;
         if (!parent_element) return;
 
-        const hours_before_first_task = this.tasks.length == 0 ? date_utils.diff(
+        const hours_before_first_task = this.tasks.length === 0 ? date_utils.diff(
             date_utils.add(this.gantt_start, 30, 'day'),
             this.gantt_start,
             'hour'
@@ -786,7 +787,7 @@ export default class Gantt {
             this.options.step *
             this.options.column_width -
             this.options.column_width *
-            number_of_columns
+            number_of_columns;
 
         parent_element.scrollLeft = scroll_pos;
     }
@@ -843,7 +844,7 @@ export default class Gantt {
             this.bar_being_dragged = parent_bar_id;
 
             bars.forEach(bar => {
-                if (bar.task.editable != false) {
+                if (bar.task.editable) {
                     const $bar = bar.$bar;
                     $bar.ox = $bar.getX();
                     $bar.oy = $bar.getY();
@@ -894,7 +895,7 @@ export default class Gantt {
                     }
                 } else if (is_dragging) {
                     if (start_drag && end_drag) {
-                        bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+                        bar.update_bar_position({x: $bar.ox + $bar.finaldx});
                     }
                 }
             });
@@ -997,15 +998,19 @@ export default class Gantt {
 
             if (from_bar == null) {
                 from_bar = this.get_bar(bar_wrapper.getAttribute('data-id'));
-                this.bars.forEach((b) => {
-                    if (from_bar != b && !b.task.dependencies.includes(from_bar.task.id)) {
-                        b.$endpoint_end.classList.add('endpoint-active');
-                    }
-                });
+                if (from_bar && from_bar.task.editable) {
+                    this.bars.forEach((b) => {
+                        if (from_bar != b && !b.task.dependencies.includes(from_bar.task.id)) {
+                            if (b.task && b.task.editable) {
+                                b.$endpoint_end.classList.add('endpoint-active');
+                            }
+                        }
+                    });
+                }
             } else {
                 to_bar = this.get_bar(bar_wrapper.getAttribute('data-id'));
 
-                if (from_bar != to_bar && to_bar.$endpoint_end.classList.contains('endpoint-active')) {
+                if (from_bar !== to_bar && to_bar.$endpoint_end.classList.contains('endpoint-active')) {
                     to_bar.task.dependencies.push(from_bar.task.id);
 
                     const arrow = new Arrow(
@@ -1041,72 +1046,7 @@ export default class Gantt {
 
     reset_endpoints() {
         this.bars.forEach((b) => {
-            b.$endpoint_end.classList.remove('endpoint-active')
-            if (!b.$endpoint_end.is_used) {
-                b.$endpoint_end.style.opacity = null;
-            }
-
-            b.$endpoint_end.style.visibility = null;
-        });
-
-        return [null, null];
-    }
-
-    bind_endpoints() {
-        let from_bar = null;
-        let to_bar = null;
-
-        $.on(this.$svg, 'click', '.endpoint', (e, element) => {
-            const bar_wrapper = $.closest('.bar-wrapper', element);
-
-            if (element.classList.contains('start')) {
-                return;
-            }
-
-            if (from_bar == null) {
-                from_bar = this.get_bar(bar_wrapper.getAttribute('data-id'));
-                this.bars.forEach((b) => {
-                    if (from_bar != b && !b.task.dependencies.includes(from_bar.task.id)) {
-                        b.$endpoint_end.classList.add('endpoint-active');
-                    }
-                });
-            } else {
-                to_bar = this.get_bar(bar_wrapper.getAttribute('data-id'));
-
-                if (from_bar != to_bar && to_bar.$endpoint_end.classList.contains('endpoint-active')) {
-                    to_bar.task.dependencies.push(from_bar.task.id);
-
-                    const arrow = new Arrow(
-                        this,
-                        from_bar,
-                        to_bar
-                    );
-                    this.layers.arrow.appendChild(arrow.element);
-
-                    this.arrows.push(arrow);
-                    from_bar.arrows.push(arrow);
-                    to_bar.arrows.push(arrow);
-                    this.trigger_event('dependency_added', [from_bar.task.id]);
-                }
-
-                [from_bar, to_bar] = this.reset_endpoints();
-            }
-        });
-
-        $.on(
-            this.$svg,
-            'click',
-            '.grid-row, .grid-header, .bar-group, .handle-group',
-            () => {
-                [from_bar, to_bar] = this.reset_endpoints();
-            }
-        );
-
-    }
-
-    reset_endpoints() {
-        this.bars.forEach((b) => {
-            b.$endpoint_end.classList.remove('endpoint-active')
+            b.$endpoint_end.classList.remove('endpoint-active');
             if (!b.$endpoint_end.is_used) {
                 b.$endpoint_end.style.opacity = null;
             }

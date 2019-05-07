@@ -1,4 +1,4 @@
-import { $, createSVG } from './svg_utils';
+import {$, createSVG} from './svg_utils';
 
 export default class Arrow {
     constructor(gantt, from_task, to_task) {
@@ -102,6 +102,10 @@ export default class Arrow {
     }
 
     setup_click_event() {
+        if (!this.from_task.task.editable || !this.to_task.task.editable) {
+            return;
+        }
+
         $.on(this.element, 'click', e => {
 
             if (e.type === 'click') {
@@ -123,7 +127,7 @@ export default class Arrow {
                 if (a.endpoint === this.endpoint)
                     is_used = true;
             });
-            this.endpoint.is_used = is_used
+            this.endpoint.is_used = is_used;
             this.endpoint.style.opacity = is_used ? 1 : null;
             this.to_task.arrows = this.to_task.arrows.filter(a => a !== this);
         });

@@ -79,19 +79,21 @@
 .gantt .bar-wrapper {
   cursor: pointer;
   outline: none; }
-  .gantt .bar-wrapper:hover .bar {
+  .gantt .bar-wrapper .bar-group-wrapper {
+    outline: none; }
+  .gantt .bar-wrapper:hover:not(.disabled) .bar {
     fill: #a9b5c1; }
-  .gantt .bar-wrapper:hover .bar-progress {
+  .gantt .bar-wrapper:hover:not(.disabled) .bar-progress {
     fill: #8a8aff; }
-  .gantt .bar-wrapper:hover .handle {
+  .gantt .bar-wrapper:hover:not(.disabled) .handle {
     visibility: visible;
     opacity: 1; }
-  .gantt .bar-wrapper:hover .endpoint.end {
+  .gantt .bar-wrapper:hover:not(.disabled) .endpoint.end {
     cursor: copy;
     stroke: cyan;
     stroke-width: 1px;
     opacity: 1; }
-  .gantt .bar-wrapper:hover .endpoint.start {
+  .gantt .bar-wrapper:hover:not(.disabled) .endpoint.start {
     cursor: default; }
   .gantt .bar-wrapper.active .bar {
     fill: #a9b5c1; }
@@ -114,7 +116,8 @@
 .gantt-swimlanes-container {
   position: relative;
   overflow: auto;
-  font-size: 12px; }
+  font-size: 12px;
+  float: left; }
   .gantt-swimlanes-container .gantt-swimlanes .swimlanes-header {
     fill: #ffffff;
     stroke: #e0e0e0;
