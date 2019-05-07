@@ -1,6 +1,8 @@
 import sass from 'rollup-plugin-sass';
 import uglify from 'rollup-plugin-uglify';
 import merge from 'deepmerge';
+import commonjs from 'rollup-plugin-commonjs';
+import resolve from 'rollup-plugin-node-resolve';
 
 const dev = {
 
@@ -14,7 +16,13 @@ const dev = {
     plugins: [
         sass({
             output: 'dist/frappe-gantt.css'
-        })
+        }),
+        commonjs({
+            include: [
+                'node_modules/moment/**'
+            ]
+        }),
+        resolve()
     ]
 };
 

@@ -104,7 +104,11 @@ $handle-color: #ddd !default;
 		cursor: pointer;
 		outline: none;
 
-		&:hover {
+		.bar-group-wrapper {
+			outline: none;
+		}
+
+		&:hover:not(.disabled) {
 			.bar {
 				fill: darken($bar-color, 5);
 			}
@@ -160,6 +164,7 @@ $handle-color: #ddd !default;
 	position: relative;
 	overflow: auto;
 	font-size: 12px;
+	float: left;
 
 	.gantt-swimlanes {
 
@@ -190,8 +195,8 @@ $handle-color: #ddd !default;
 				stroke-width: 1.4;
 			}
 
-		.sub-swimlane {	
-		
+		.sub-swimlane {
+
 			.sub-swimlane-label {
 				padding: 10px;
 				fill: black;

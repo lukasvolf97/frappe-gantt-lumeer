@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 const YEAR = 'year';
 const MONTH = 'month';
 const DAY = 'day';
@@ -90,7 +92,7 @@ export default {
             let vals = date_parts;
 
             if (time_parts && time_parts.length) {
-                if (time_parts.length == 4) {
+                if (time_parts.length === 4) {
                     time_parts[3] = '0.' + time_parts[3];
                     time_parts[3] = parseFloat(time_parts[3]) * 1000;
                 }
@@ -161,13 +163,16 @@ export default {
     diff(date_a, date_b, scale = DAY) {
         let milliseconds, seconds, hours, minutes, days, months, years;
 
-        milliseconds = date_a - date_b;
-        seconds = milliseconds / 1000;
-        minutes = seconds / 60;
-        hours = minutes / 60;
-        days = hours / 24;
-        months = days / 30;
-        years = months / 12;
+        const momentA = moment(date_a);
+        const momentB = moment(date_b);
+
+        days = momentA.diff(momentB, 'days');
+        months = momentA.diff(momentB, 'months');
+        years = momentA.diff(momentB, 'years');
+        hours = days * 24;
+        minutes = hours * 60;
+        seconds = minutes * 60;
+        milliseconds = seconds * 1000;
 
         if (!scale.endsWith('s')) {
             scale += 's';
@@ -265,7 +270,7 @@ export default {
 
         // Feb
         const year = date.getFullYear();
-        if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
+        if ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) {
             return 29;
         }
         return 28;
