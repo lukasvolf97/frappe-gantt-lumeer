@@ -1,7 +1,7 @@
 var Gantt = (function () {
 	'use strict';
 
-	var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+	var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 	function commonjsRequire () {
 		throw new Error('Dynamic requires are not currently supported by rollup-plugin-commonjs');
@@ -5178,7 +5178,7 @@ var Gantt = (function () {
 	            x: this.x + this.width / 2,
 	            y: this.y + this.height / 2,
 	            style: (this.task.text_color) ? 'fill:' + this.task.text_color + '; ' : '',
-	            innerHTML: this.task.name,
+	            innerHTML: new Option(this.task.name).innerHTML,
 	            class: 'bar-label',
 	            append_to: this.bar_group
 	        });
@@ -5303,7 +5303,7 @@ var Gantt = (function () {
 	        });
 	    }
 
-	    update_bar_position({x = null, width = null}) {
+	    update_bar_position({ x = null, width = null }) {
 	        const bar = this.$bar;
 	        if (x) {
 	            // get all x values of parent task
@@ -5338,7 +5338,7 @@ var Gantt = (function () {
 	        if (!this.task.editable) return;
 
 	        let changed = false;
-	        const {new_start_date, new_end_date} = this.compute_start_end_date();
+	        const { new_start_date, new_end_date } = this.compute_start_end_date();
 
 	        if (Number(this.task._start) !== Number(new_start_date)) {
 	            changed = true;
@@ -5393,7 +5393,7 @@ var Gantt = (function () {
 	            'hour'
 	        );
 
-	        return {new_start_date, new_end_date};
+	        return { new_start_date, new_end_date };
 	    }
 
 	    compute_progress() {
@@ -5403,7 +5403,7 @@ var Gantt = (function () {
 	    }
 
 	    compute_x() {
-	        const {step, column_width} = this.gantt.options;
+	        const { step, column_width } = this.gantt.options;
 	        const task_start = this.task._start;
 	        const gantt_start = this.gantt.gantt_start;
 
@@ -6120,9 +6120,10 @@ var Gantt = (function () {
 
 	    setup_swimlanes(tasks) {
 	        tasks.map((task) => task.used = false);
-
+	        this.contains_swimlanes = false;    
 	        this.swimlanes_map = {};
 	        let index = 0;
+	        
 	        tasks.map((task) => {
 	            if (task.swimlane && task.used !== true) {
 	                this.contains_swimlanes = true;

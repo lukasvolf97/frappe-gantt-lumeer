@@ -1,5 +1,5 @@
 import date_utils from './date_utils';
-import {$, createSVG, animateSVG} from './svg_utils';
+import { $, createSVG, animateSVG } from './svg_utils';
 
 export default class Bar {
     constructor(gantt, task) {
@@ -141,7 +141,7 @@ export default class Bar {
             x: this.x + this.width / 2,
             y: this.y + this.height / 2,
             style: (this.task.text_color) ? 'fill:' + this.task.text_color + '; ' : '',
-            innerHTML: this.task.name,
+            innerHTML: new Option(this.task.name).innerHTML,
             class: 'bar-label',
             append_to: this.bar_group
         });
@@ -266,7 +266,7 @@ export default class Bar {
         });
     }
 
-    update_bar_position({x = null, width = null}) {
+    update_bar_position({ x = null, width = null }) {
         const bar = this.$bar;
         if (x) {
             // get all x values of parent task
@@ -301,7 +301,7 @@ export default class Bar {
         if (!this.task.editable) return;
 
         let changed = false;
-        const {new_start_date, new_end_date} = this.compute_start_end_date();
+        const { new_start_date, new_end_date } = this.compute_start_end_date();
 
         if (Number(this.task._start) !== Number(new_start_date)) {
             changed = true;
@@ -356,7 +356,7 @@ export default class Bar {
             'hour'
         );
 
-        return {new_start_date, new_end_date};
+        return { new_start_date, new_end_date };
     }
 
     compute_progress() {
@@ -366,7 +366,7 @@ export default class Bar {
     }
 
     compute_x() {
-        const {step, column_width} = this.gantt.options;
+        const { step, column_width } = this.gantt.options;
         const task_start = this.task._start;
         const gantt_start = this.gantt.gantt_start;
 

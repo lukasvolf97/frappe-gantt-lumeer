@@ -221,9 +221,10 @@ export default class Gantt {
 
     setup_swimlanes(tasks) {
         tasks.map((task) => task.used = false);
-
+        this.contains_swimlanes = false;    
         this.swimlanes_map = {};
         let index = 0;
+        
         tasks.map((task) => {
             if (task.swimlane && task.used !== true) {
                 this.contains_swimlanes = true;
