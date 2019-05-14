@@ -6013,6 +6013,9 @@ var Gantt = (function () {
 
 	        this.table_width = this.dates.length * this.options.column_width;
 
+	        this.popups_bar = null;
+
+	        if (this.popup) this.popup.parent.style.visibility = 'hidden';
 
 	    }
 
@@ -6120,10 +6123,10 @@ var Gantt = (function () {
 
 	    setup_swimlanes(tasks) {
 	        tasks.map((task) => task.used = false);
-	        this.contains_swimlanes = false;    
+	        this.contains_swimlanes = false;
 	        this.swimlanes_map = {};
 	        let index = 0;
-	        
+
 	        tasks.map((task) => {
 	            if (task.swimlane && task.used !== true) {
 	                this.contains_swimlanes = true;
@@ -6319,8 +6322,8 @@ var Gantt = (function () {
 	    }
 
 	    make_grid_rows() {
-	        const rows_layer = createSVG('g', {append_to: this.layers.grid});
-	        const lines_layer = createSVG('g', {append_to: this.layers.grid});
+	        const rows_layer = createSVG('g', { append_to: this.layers.grid });
+	        const lines_layer = createSVG('g', { append_to: this.layers.grid });
 
 	        const row_width = this.row_width;
 	        const row_height = this.row_height;
@@ -6500,8 +6503,8 @@ var Gantt = (function () {
 	            'Half Day_upper':
 	                date.getDate() !== last_date.getDate()
 	                    ? date.getMonth() !== last_date.getMonth()
-	                    ? date_utils.format(date, 'D MMM', this.options.language)
-	                    : date_utils.format(date, 'D', this.options.language)
+	                        ? date_utils.format(date, 'D MMM', this.options.language)
+	                        : date_utils.format(date, 'D', this.options.language)
 	                    : '',
 	            Day_upper:
 	                date.getMonth() !== last_date.getMonth()
@@ -6612,8 +6615,7 @@ var Gantt = (function () {
 	    make_bars() {
 	        this.bars = this.tasks.map(task => {
 	            const bar = new Bar(this, task);
-	            if (this.popup && task == this.popup.options.task) this.popups_bar = bar;
-	            if (this.popup && this.popup.parent.style.visibility === 'hidden') this.popups_bar = null;
+	            if (this.popup && task.id === this.popup.options.task.id) this.popups_bar = bar;
 	            this.layers.bar.appendChild(bar.group);
 	            return bar;
 	        });
@@ -6795,7 +6797,7 @@ var Gantt = (function () {
 	                    }
 	                } else if (is_dragging) {
 	                    if (start_drag && end_drag) {
-	                        bar.update_bar_position({x: $bar.ox + $bar.finaldx});
+	                        bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
 	                    }
 	                }
 	            });
