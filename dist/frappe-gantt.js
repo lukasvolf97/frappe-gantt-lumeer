@@ -6013,7 +6013,9 @@ var Gantt = (function () {
 
 	        this.table_width = this.dates.length * this.options.column_width;
 
+	        this.popups_bar = null;
 
+	        if (this.popup) this.popup.parent.style.visibility = 'hidden';
 	    }
 
 	    setup_tasks(tasks) {
@@ -6121,6 +6123,7 @@ var Gantt = (function () {
 	    setup_swimlanes(tasks) {
 	        tasks.map((task) => task.used = false);
 
+	        this.contains_swimlanes = false;
 	        this.swimlanes_map = {};
 	        let index = 0;
 	        tasks.map((task) => {
@@ -6611,8 +6614,7 @@ var Gantt = (function () {
 	    make_bars() {
 	        this.bars = this.tasks.map(task => {
 	            const bar = new Bar(this, task);
-	            if (this.popup && task == this.popup.options.task) this.popups_bar = bar;
-	            if (this.popup && this.popup.parent.style.visibility === 'hidden') this.popups_bar = null;
+	            if (this.popup && task.id === this.popup.options.task.id) this.popups_bar = bar;
 	            this.layers.bar.appendChild(bar.group);
 	            return bar;
 	        });
