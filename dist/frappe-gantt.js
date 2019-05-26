@@ -6016,7 +6016,6 @@ var Gantt = (function () {
 	        this.popups_bar = null;
 
 	        if (this.popup) this.popup.parent.style.visibility = 'hidden';
-
 	    }
 
 	    setup_tasks(tasks) {
