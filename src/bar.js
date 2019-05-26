@@ -155,7 +155,7 @@ export default class Bar {
         const bar = this.$bar;
         const handle_width = 8;
 
-        if (this.task.start_drag) {
+        if (this.task.end_drag) {
             createSVG('rect', {
                 x: bar.getX() + bar.getWidth() - 9,
                 y: bar.getY() + 1,
@@ -168,7 +168,7 @@ export default class Bar {
             });
         }
 
-        if (this.task.end_drag) {
+        if (this.task.start_drag) {
             createSVG('rect', {
                 x: bar.getX() + 1,
                 y: bar.getY() + 1,
